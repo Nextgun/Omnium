@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Omnium.UI\\MainWindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Omnium.UI\\MainWindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{338B3BF4-5E5D-444F-C3A0-24FDB7396E4C}|Omnium.UI.csproj|c:\\users\\atame\\documents\\github\\omnium\\omnium.ui\\dashboard\\panels\\dashboardpanelview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{338B3BF4-5E5D-444F-C3A0-24FDB7396E4C}|Omnium.UI.csproj|solutionrelative:dashboard\\panels\\dashboardpanelview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Omnium.UI\\MainWindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Omnium.UI\\MainWindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{338B3BF4-5E5D-444F-C3A0-24FDB7396E4C}|Omnium.UI.csproj|c:\\users\\atame\\documents\\github\\omnium\\omnium.ui\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{338B3BF4-5E5D-444F-C3A0-24FDB7396E4C}|Omnium.UI.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{338B3BF4-5E5D-444F-C3A0-24FDB7396E4C}|Omnium.UI.csproj|c:\\users\\atame\\documents\\github\\omnium\\omnium.ui\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{338B3BF4-5E5D-444F-C3A0-24FDB7396E4C}|Omnium.UI.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,34 +22,48 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Omnium.UI\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "Omnium.UI\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Omnium.UI\\MainWindow.xaml",
-              "RelativeToolTip": "Omnium.UI\\MainWindow.xaml",
+              "Title": "DashboardPanelView.xaml",
+              "DocumentMoniker": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Dashboard\\Panels\\DashboardPanelView.xaml",
+              "RelativeDocumentMoniker": "Dashboard\\Panels\\DashboardPanelView.xaml",
+              "ToolTip": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Dashboard\\Panels\\DashboardPanelView.xaml",
+              "RelativeToolTip": "Dashboard\\Panels\\DashboardPanelView.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-02-19T06:40:31.266Z"
+              "WhenOpened": "2026-02-27T03:23:00.279Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T13:46:31.901Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Omnium.UI\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "Omnium.UI\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\Omnium.UI\\MainWindow.xaml.cs",
-              "RelativeToolTip": "Omnium.UI\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T06:40:27.871Z"
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\Users\\atame\\Documents\\GitHub\\Omnium\\Omnium.UI\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-19T13:46:20.14Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
             }
           ]
         }
