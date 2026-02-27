@@ -19,3 +19,9 @@ C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\refint
 C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\Omnium.UI.pdb
 C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\Omnium.UI.genruntimeconfig.cache
 C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\ref\Omnium.UI.dll
+C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\bin\Debug\net8.0-windows\GongSolutions.WPF.DragDrop.dll
+C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\Omnium.UI.csproj.AssemblyReference.cache
+C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\Dashboard\Panels\DashboardPanelView.g.cs
+C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\Dashboard\Panels\DashboardPanelView.baml
+C:\Users\atame\Documents\GitHub\Omnium\Omnium.UI\obj\Debug\net8.0-windows\Omnium.UI.csproj.Up2Date

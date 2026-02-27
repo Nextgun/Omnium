@@ -8,10 +8,20 @@
              d:DesignHeight="450" d:DesignWidth="800">
     
     <Border BorderBrush="#FF2A2A2A"
-        BorderThickness="1"
-        Background="#FF1A1A1A"
-        CornerRadius="10"
-        Padding="12">
+            BorderThickness="1"
+            Background="#FF2F3545"
+            CornerRadius="10"
+            Padding="6"
+            Width="320"
+            Height="220">
+
+        <Border.Effect>
+            <DropShadowEffect Color="#FF000000"
+                              BlurRadius="18"
+                              ShadowDepth="1"
+                              Opacity="0.35"
+                              Direction="270"/>
+        </Border.Effect>
 
         <Grid>
             <!-- Define two vertical rows inside the panel -->
@@ -25,7 +35,7 @@
 
             <!-- HEADER (Row 0) -->
             <Grid Grid.Row="0" Margin="0,0,0,10">
-                <TextBlock Text="Panel Title"
+                <TextBlock Text="Watchlist"
                FontSize="16"
                FontWeight="SemiBold"
                Foreground="White"/>

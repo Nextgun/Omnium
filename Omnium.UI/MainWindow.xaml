@@ -1,12 +1,316 @@
-﻿<Window x:Class="Omnium.UI.MainWindow"
+﻿<!--
+    MainWindow.xaml
+    Purpose:
+    - Defines the main application shell (background + layout regions).
+    - Layout is split into:
+        (1) Left Sidebar (static menu)
+        (2) Right Main Area (top navigation + dashboard content area)
+-->
+
+<Window x:Class="Omnium.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Omnium.UI"
+        xmlns:local="clr-namespace:Omnium.UI.Dashboard.Panels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Omnium"
+        Height="900"
+        Width="1600">
+
+    <!-- ==========================================================
+         WINDOW BACKGROUND
+         - Sets the global "app surface" gradient.
+         - This gradient should visually unify the sidebar + main area.
+         ========================================================== -->
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF202020" Offset="1"/>
+            <GradientStop Color="#FF1A203A" Offset="0"/>
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <!-- ==========================================================
+         WINDOW RESOURCES
+         - Reusable styles live here so the XAML stays clean.
+         - These are applied via StaticResource to Buttons, etc.
+         ========================================================== -->
+    <Window.Resources>
+
+        <!-- ======================================================
+             SIDEBAR BUTTON STYLE
+             Purpose:
+             - Gives sidebar menu buttons a consistent "card-like" look.
+             - Includes hover + pressed feedback.
+             Notes:
+             - Uses a custom ControlTemplate so we can apply CornerRadius.
+             ====================================================== -->
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <!-- Basic sizing + text layout -->
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Foreground" Value="#E6EAF2"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+
+            <!-- Custom template (rounded button + hover states) -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"
+                                Background="#FF2F3545"
+                                BorderBrush="#FF3C445A"
+                                BorderThickness="1"
+                                CornerRadius="8">
+
+                            <!-- Hosts the button content (text) -->
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="Center"
+                                Margin="{TemplateBinding Padding}"/>
+                        </Border>
+
+                        <!-- Interaction feedback -->
+                        <ControlTemplate.Triggers>
+
+                            <!-- Hover: slightly brighter surface -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#FF384058"/>
+                            </Trigger>
+
+                            <!-- Pressed: slightly darker surface -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#FF242B3C"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ======================================================
+             TOP NAV TAB STYLE
+             Purpose:
+             - "Text tab" buttons in the top bar (Trade / Account / Orders).
+             - Minimal look: transparent background, no border.
+             - Hover: makes text brighter.
+             - Pressed: shows an underline (placeholder for future "selected" state).
+             ====================================================== -->
+        <Style x:Key="TopNavTabStyle" TargetType="Button">
+            <!-- Make each button fill the nav bar height -->
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+            <!-- Keep spacing between buttons WITHOUT making hover fill the gaps -->
+            <Setter Property="Margin" Value="0,0,14,0"/>
+
+            <!-- Make the tab area larger (bigger hit target) -->
+            <Setter Property="MinWidth" Value="88"/>
+            <Setter Property="Padding" Value="18,0"/>
+
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#C9D1E8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <!-- This Border IS the full clickable rectangle -->
+                        <Border x:Name="HitBox"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="0"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch">
+
+                            <!-- Center text inside the rectangle -->
+                            <ContentPresenter
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Hover: highlight the entire rectangle -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HitBox" Property="Background" Value="#22FFFFFF"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+
+                            <!-- Pressed: a bit stronger -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="HitBox" Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- ==========================================================
+         ROOT LAYOUT GRID
+         Purpose:
+         - Two-column layout:
+             Column 0 = Left Sidebar (fixed width)
+             Column 1 = Main Area (fills remaining width)
+         ========================================================== -->
     <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Left: static menu/sidebar region -->
+            <ColumnDefinition Width="260"/>
+            <!-- Right: main dashboard region -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ======================================================
+             LEFT SIDEBAR
+             Purpose:
+             - Branding at the top
+             - Menu buttons in the middle
+             - Status text at the bottom
+             Notes:
+             - Currently uses a gradient background to match the window for a seamless blend.
+             - BorderThickness is present (0,0,1,0) but can be removed if you want NO divider.
+             ====================================================== -->
+        <Border Grid.Column="0"
+                BorderThickness="0,0,1,0">
+            <!-- Sidebar background (matches Window background for seamless look) -->
+            <Border.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF202020" Offset="1"/>
+                    <GradientStop Color="#FF1A203A" Offset="0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+
+            <!-- Sidebar internal layout: Branding / Menu / Status -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <!-- Top: branding strip -->
+                    <RowDefinition Height="64"/>
+                    <!-- Middle: menu buttons -->
+                    <RowDefinition Height="*"/>
+                    <!-- Bottom: connection/status -->
+                    <RowDefinition Height="72"/>
+                </Grid.RowDefinitions>
+
+                <!-- Sidebar Branding -->
+                <TextBlock Grid.Row="0"
+                           Text="OMNIUM"
+                           Margin="18,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="#E6EAF2"
+                           FontSize="16"
+                           FontWeight="SemiBold"/>
+
+                <!-- Sidebar Menu Buttons (placeholders for now) -->
+                <StackPanel Grid.Row="1" Margin="14,10">
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_1"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_2"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_3"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_4"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_5"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_7"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_8"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_9"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_10"/>
+                </StackPanel>
+
+                <!-- Sidebar Status (placeholder; later can be bound to real connection state) -->
+                <TextBlock Grid.Row="2"
+                           Text="Connected"
+                           Margin="18,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="#9AA6C1"
+                           FontSize="12"/>
+            </Grid>
+        </Border>
+
+        <!-- ======================================================
+             RIGHT MAIN AREA
+             Purpose:
+             - Top navigation bar (tabs + net P/L display)
+             - Dashboard canvas/content area
+             Notes:
+             - Margin currently gives padding around the main area.
+             - If you want the top bar flush to the window top, change Margin to: 16,0,16,16
+             ====================================================== -->
+        <Grid Grid.Column="1" Margin="16,6,16,16">
+            <Grid.RowDefinitions>
+                <!-- Top nav bar strip (thin) -->
+                <RowDefinition Height="44"/>
+                <!-- Main dashboard content -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ==================================================
+                 TOP BAR
+                 Purpose:
+                 - Left: Navigation tabs (Trade / Account / Orders)
+                 - Right: Net P/L display (currently static text)
+                 ================================================== -->
+            <Grid Grid.Row="0" Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <!-- Left button group -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Spacer pushes right group to the edge -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Right button group -->
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT GROUP: TRADE + placeholders -->
+                <StackPanel Grid.Column="0"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Left"
+                    Margin="0">
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="TRADE"/>
+
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="button_11"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="button_12"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="button_13"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="button_14"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="button_15"/>
+                </StackPanel>
+
+                <!-- RIGHT GROUP: Account, Orders, P/L -->
+                <StackPanel Grid.Column="2"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Right"
+                    Margin="0">
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="Account" Margin="0,0,16,0"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="Orders" Margin="0,0,18,0"/>
+
+                    <!-- P/L display (not a Button for now; we can make it one later if you want hover) -->
+                    <TextBlock VerticalAlignment="Center"
+                   Foreground="#8FA1C7"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Text="P/L: +$1,245.22"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ==================================================
+                 DASHBOARD CONTENT AREA
+                 Purpose:
+                 - Where draggable / grid-snapping panels will live later.
+                 - Currently contains a single DashboardPanelView instance.
+                 ================================================== -->
+            <Grid Grid.Row="1">
+                <local:DashboardPanelView
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"/>
+            </Grid>
+        </Grid>
 
     </Grid>
+
 </Window>

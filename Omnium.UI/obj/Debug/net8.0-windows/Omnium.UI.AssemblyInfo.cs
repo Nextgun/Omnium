@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Omnium.UI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1f31e68eba4d8d6891fa2a830c2f706b90de8dd1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fc0185600ecda60de3aa59ed5038e61e5e0cb505")]
 [assembly: System.Reflection.AssemblyProductAttribute("Omnium.UI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Omnium.UI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
