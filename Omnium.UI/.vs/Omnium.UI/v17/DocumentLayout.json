@@ -21,7 +21,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
+          "DockedWidth": 223,
           "SelectedChildIndex": 2,
           "Children": [
             {
@@ -59,10 +59,6 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2026-02-19T13:46:20.14Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
             }
           ]
         }
