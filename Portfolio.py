@@ -3,13 +3,8 @@ import logging
 import json
 
 #trade logging function
-#code an entry/exit system 
-
-
+#code an entry/exit system maybe purches and such
 #do something that for prices on portfolio
-#aka pick up #18 soon possibly
-
-
 #logging of trades
 logging.basicConfig(
     filename="trading.log", 
@@ -60,30 +55,15 @@ class Portfolio:
 
 account_id = Portfolio()
 
-account_id.buy("Company Example", 10, 180)
-account_id.buy("Company Example", 5, 190)
-account_id.sell("Company Example", 3)
-
+account_id.buy(asset_id, 10, 180)
+account_id.buy(asset_id, 5, 190)
+account_id.sell(asset_id, 3)
 account_id.show()
-
 
 #extra code, it probably does something (maybe)
 def buy(account_id, asset_id, quantity, price):
     logging.info(f"BUY {quantity} {asset_id} at {price}")
-    ...
-
-#some sort of filesaving
-
-def save_portfolio(account_id):
-    with open("account.json", "w") as f:
-        json.dump(account_id.positions, f)
-
-def load_portfolio():
-    try:
-        with open("account_id", "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
+    ... #not completed
     
 #not required
 def portfolio_value(account_id, market_prices):
