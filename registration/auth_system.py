@@ -8,6 +8,7 @@ date last modified: 3/6/2026
 
 import hashlib
 import database.db as db
+import search as search
 from typing import Tuple
 from datetime import datetime, timedelta
 
@@ -274,7 +275,8 @@ class UserInterface:
             print(f"Logged in as: {self.auth.get_current_user()}")
             print("1. Logout")
             print("2. Access Trading Platform")
-            print("3. Exit")
+            print("3. Search Securities")
+            print("4. Exit")
         else:
             print("1. Register")
             print("2. Login")
@@ -337,7 +339,13 @@ class UserInterface:
                     print("\n✓ Access Granted - Launching Trading Platform...")
 
                     # Add your trading platform code here
+
                 elif choice == "3":
+                    "Enter your search query here."
+                    # entry point for search.py
+
+
+                elif choice == "4":
 
                     self.auth.logout()
                     print("Goodbye!")

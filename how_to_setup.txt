@@ -1,6 +1,6 @@
 ================================================================================
  OMNIUM — Day Trading Applications Prototype
- How to Set-Up
+ How to Set-Up 
 ================================================================================
 
 PREREQUISITES
@@ -17,7 +17,7 @@ The following need to be installed before running the application:
          * Leave the port as 3306
          * Check "Install as service"
      - After installation, add MariaDB to PATH:
-         * Bin can be found at: C:\Program Files\MariaDB 11.x\bin
+         * Bin can be found at: C:\Program Files\MariaDB 12.x\bin
          * Add it via System Properties -> Environment Variables -> System Variables -> Path
 
 
