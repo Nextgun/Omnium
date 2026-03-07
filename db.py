@@ -15,7 +15,7 @@ import mariadb
 import sys
 from datetime import datetime
 
-# mariaDB setup
+# mariaDB setup. change this if needed, but it should work by default.
 DB_CONFIG = {
     "host":     "localhost",
     "port":     3306,
@@ -242,7 +242,6 @@ def get_price_history(asset_id: int, limit: int = 30) -> list[dict]:
         return []
     finally:
         conn.close()
-
 
 # ── ACCOUNTS ──────────────────────────────────────────────────────────────
 
