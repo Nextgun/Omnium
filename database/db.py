@@ -1,7 +1,7 @@
 """
 ==========================
 db.py - abstraction layer for interacting with the database
-author: Ayesha Khan
+author: 
 data created: 2/15/2026
 date last modified: 3/6/2026
 =====================================
@@ -381,5 +381,161 @@ def get_position(account_id: int, asset_id: int) -> int:
     except Exception as e:
         print(f"[db] get_position error: {e}")
         return 0
+    finally:
+        conn.close()
+
+# user accounts ----------------------------------------------------------------
+
+def initialize_users_tables() -> None:
+    """
+    creates the users and lockouts tables if they don't already exist.
+    safe to call on every startup.
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                username     VARCHAR(255) PRIMARY KEY,
+                display_name VARCHAR(255) NOT NULL,
+                password     VARCHAR(255) NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS lockouts (
+                username        VARCHAR(255) PRIMARY KEY,
+                failed_attempts INT      DEFAULT 0,
+                lockout_until   DATETIME DEFAULT NULL
+            )
+        """)
+        conn.commit()
+    except Exception as e:
+        print(f"[db] initialize_users_tables error: {e}")
+    finally:
+        conn.close()
+
+
+def create_user(username: str, display_name: str, password_hash: str) -> bool:
+    """
+    inserts a new row into USERS.
+    username is stored lowercase; display_name preserves original casing.
+    returns true on success; false if failure.
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO users (username, display_name, password) VALUES (?, ?, ?)",
+            (username.lower(), display_name, password_hash)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"[db] create_user error: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def get_user(username: str) -> dict | None:
+    """
+    returns one user by username (case-insensitive), or None if not found.
+    result: {"username", "display_name", "password"}
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT username, display_name, password FROM users WHERE username = ?",
+            (username.lower(),)
+        )
+        row = cursor.fetchone()
+        return _row_to_dict(cursor, row) if row else None
+    except Exception as e:
+        print(f"[db] get_user error: {e}")
+        return None
+    finally:
+        conn.close()
+
+
+# USER LOCKOUTS ------------------------------------------------------------------
+
+def initialize_user_lockout(username: str) -> None:
+    """
+    inserts a lockout row for a user if one doesn't already exist.
+    safe to call multiple times.
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT IGNORE INTO lockouts (username, failed_attempts, lockout_until) VALUES (?, 0, NULL)",
+            (username.lower(),)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"[db] initialize_user_lockout error: {e}")
+    finally:
+        conn.close()
+
+
+def get_lockout(username: str) -> dict | None:
+    """
+    returns lockout info for a user, or None if not found.
+    result: {"username", "failed_attempts", "lockout_until"}
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT username, failed_attempts, lockout_until FROM lockouts WHERE username = ?",
+            (username.lower(),)
+        )
+        row = cursor.fetchone()
+        return _row_to_dict(cursor, row) if row else None
+    except Exception as e:
+        print(f"[db] get_lockout error: {e}")
+        return None
+    finally:
+        conn.close()
+
+
+def increment_failed_attempt(username: str, lockout_until: datetime | None = None) -> None:
+    """
+    increments failed_attempts by 1 for a user.
+    if lockout_until is provided, sets it at the same time (account is being locked).
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """UPDATE lockouts
+               SET failed_attempts = failed_attempts + 1,
+                   lockout_until   = ?
+               WHERE username = ?""",
+            (lockout_until, username.lower())
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"[db] increment_failed_attempt error: {e}")
+    finally:
+        conn.close()
+
+
+def reset_lockout(username: str) -> None:
+    """
+    resets failed_attempts to 0 and clears lockout_until for a user.
+    called after a successful login or when a lockout period expires.
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE lockouts SET failed_attempts = 0, lockout_until = NULL WHERE username = ?",
+            (username.lower(),)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"[db] reset_lockout error: {e}")
     finally:
         conn.close()

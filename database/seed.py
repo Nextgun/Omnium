@@ -19,7 +19,7 @@ safe to re-run; it will clear any existing data in it first
 import random
 from datetime import datetime, timedelta
 import yfinance as yf
-import db
+import database.db as db
 
 # configure which stocks you want in the database
 SYMBOLS = [

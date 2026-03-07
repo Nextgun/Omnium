@@ -1,71 +1,29 @@
-import os
+''' ==========================
+auth_system.py - registration and login 
+author: Brady Bottari
+data created: 
+date last modified: 3/6/2026
+==========================
+'''
+
 import hashlib
-import json
-import time
-from pathlib import Path
-from typing import Dict, Tuple
+import database.db as db
+from typing import Tuple
 from datetime import datetime, timedelta
 
 class RegistrationSystem:
-    """User registration and authentication system with file-based storage."""
+    """User registration and authentication system with MySQL storage."""
     
-    def __init__(self, credentials_file: str = "credentials.json", lockout_file: str = "lockouts.json"):
-        """
-        Initialize the registration system.
-        
-        Args:
-            credentials_file: Path to store user credentials (JSON format)
-            lockout_file: Path to store lockout information
-        """
-        self.credentials_file = credentials_file
-        self.lockout_file = lockout_file
+    def __init__(self):
+        """Initialize the registration system."""
         self.current_user = None
         self.max_attempts = 3
         self.lockout_duration = 60  # 1 minute in seconds
-        self._load_credentials()
-        self._load_lockouts()
-    
-    def _load_credentials(self) -> None:
-        """Load existing credentials from file."""
-        if os.path.exists(self.credentials_file):
-            try:
-                with open(self.credentials_file, 'r') as f:
-                    self.users = json.load(f)
-            except (json.JSONDecodeError, IOError):
-                self.users = {}
-        else:
-            self.users = {}
-    
-    def _save_credentials(self) -> None:
-        """Save credentials to file."""
-        with open(self.credentials_file, 'w') as f:
-            json.dump(self.users, f, indent=4)
-    
-    def _load_lockouts(self) -> None:
-        """Load existing lockout data from file."""
-        if os.path.exists(self.lockout_file):
-            try:
-                with open(self.lockout_file, 'r') as f:
-                    self.lockouts = json.load(f)
-            except (json.JSONDecodeError, IOError):
-                self.lockouts = {}
-        else:
-            self.lockouts = {}
-    
-    def _save_lockouts(self) -> None:
-        """Save lockout data to file."""
-        with open(self.lockout_file, 'w') as f:
-            json.dump(self.lockouts, f, indent=4)
+        db.initialize_users_tables()
     
     def _initialize_user_lockout(self, username: str) -> None:
         """Initialize lockout tracking for a user."""
-        username_lower = username.lower()
-        if username_lower not in self.lockouts:
-            self.lockouts[username_lower] = {
-                "failed_attempts": 0,
-                "lockout_until": None
-            }
-            self._save_lockouts()
+        db.initialize_user_lockout(username)
     
     def _is_user_locked_out(self, username: str) -> Tuple[bool, int]:
         """
@@ -77,28 +35,22 @@ class RegistrationSystem:
         Returns:
             Tuple of (is_locked_out, seconds_remaining)
         """
-        username_lower = username.lower()
-        
-        if username_lower not in self.lockouts:
-            self._initialize_user_lockout(username)
+        self._initialize_user_lockout(username)
+
+        lockout_info = db.get_lockout(username)
+
+        if not lockout_info or lockout_info["lockout_until"] is None:
             return False, 0
-        
-        lockout_info = self.lockouts[username_lower]
-        
-        if lockout_info["lockout_until"] is None:
-            return False, 0
-        
-        lockout_time = datetime.fromisoformat(lockout_info["lockout_until"])
+
+        lockout_time = lockout_info["lockout_until"]
         current_time = datetime.now()
-        
+
         if current_time < lockout_time:
             seconds_remaining = int((lockout_time - current_time).total_seconds())
             return True, seconds_remaining
         else:
             # Lockout period has expired, reset attempts
-            lockout_info["failed_attempts"] = 0
-            lockout_info["lockout_until"] = None
-            self._save_lockouts()
+            db.reset_lockout(username)
             return False, 0
     
     def _record_failed_attempt(self, username: str) -> None:
@@ -108,20 +60,17 @@ class RegistrationSystem:
         Args:
             username: Username that failed to login
         """
-        username_lower = username.lower()
-        
-        if username_lower not in self.lockouts:
-            self._initialize_user_lockout(username)
-        
-        lockout_info = self.lockouts[username_lower]
-        lockout_info["failed_attempts"] += 1
-        
-        if lockout_info["failed_attempts"] >= self.max_attempts:
+        self._initialize_user_lockout(username)
+
+        lockout_info = db.get_lockout(username)
+        new_attempts = lockout_info["failed_attempts"] + 1
+
+        if new_attempts >= self.max_attempts:
             # Lock the account
             lockout_until = datetime.now() + timedelta(seconds=self.lockout_duration)
-            lockout_info["lockout_until"] = lockout_until.isoformat()
-        
-        self._save_lockouts()
+            db.increment_failed_attempt(username, lockout_until)
+        else:
+            db.increment_failed_attempt(username)
     
     def _reset_failed_attempts(self, username: str) -> None:
         """
@@ -130,12 +79,7 @@ class RegistrationSystem:
         Args:
             username: Username that successfully logged in
         """
-        username_lower = username.lower()
-        
-        if username_lower in self.lockouts:
-            self.lockouts[username_lower]["failed_attempts"] = 0
-            self.lockouts[username_lower]["lockout_until"] = None
-            self._save_lockouts()
+        db.reset_lockout(username)
     
     def _get_remaining_attempts(self, username: str) -> int:
         """
@@ -147,13 +91,12 @@ class RegistrationSystem:
         Returns:
             Number of remaining attempts
         """
-        username_lower = username.lower()
-        
-        if username_lower not in self.lockouts:
+        lockout_info = db.get_lockout(username)
+
+        if not lockout_info:
             return self.max_attempts
-        
-        failed_attempts = self.lockouts[username_lower]["failed_attempts"]
-        return max(0, self.max_attempts - failed_attempts)
+
+        return max(0, self.max_attempts - lockout_info["failed_attempts"])
     
     @staticmethod
     def _hash_password(password: str) -> str:
@@ -170,7 +113,7 @@ class RegistrationSystem:
     
     def _username_exists(self, username: str) -> bool:
         """Check if username already exists."""
-        return username.lower() in self.users
+        return db.get_user(username) is not None
     
     def _validate_username(self, username: str) -> Tuple[bool, str]:
         """
@@ -234,12 +177,7 @@ class RegistrationSystem:
             return False, f"Password validation failed: {error}"
         
         # Store user credentials
-        self.users[username.lower()] = {
-            "username": username,
-            "password": self._hash_password(password)
-        }
-        
-        self._save_credentials()
+        db.create_user(username, username, self._hash_password(password))
         
         # Initialize lockout tracking for new user
         self._initialize_user_lockout(username)
@@ -261,8 +199,7 @@ class RegistrationSystem:
             Tuple of (success, message)
         """
         # Initialize lockout tracking if not exists
-        if username.lower() not in self.lockouts:
-            self._initialize_user_lockout(username)
+        self._initialize_user_lockout(username)
         
         # Check if user is locked out
         is_locked, seconds_remaining = self._is_user_locked_out(username)
@@ -278,7 +215,8 @@ class RegistrationSystem:
             return False, f"Username not found. {remaining} attempts remaining."
         
         # Check password
-        stored_hash = self.users[username.lower()]["password"]
+        user = db.get_user(username)
+        stored_hash = user["password"]
         provided_hash = self._hash_password(password)
         
         if stored_hash != provided_hash:
@@ -293,11 +231,10 @@ class RegistrationSystem:
 
                 return False, f"Incorrect password. {remaining} attempts remaining."
         
-
         # Successful login
         self._reset_failed_attempts(username)
 
-        self.current_user = username
+        self.current_user = user["display_name"]
         return True, f"Successfully logged in as {username}"
 
     
@@ -324,7 +261,7 @@ class UserInterface:
     """Command-line interface for the registration system."""
     
     def __init__(self):
-        self.auth = RegistrationSystem("credentials.json", "lockouts.json")
+        self.auth = RegistrationSystem()
     
     def display_menu(self) -> None:
         """Display main menu options."""
