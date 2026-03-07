@@ -19,7 +19,7 @@ safe to re-run; it will clear any existing data in it first
 import random
 from datetime import datetime, timedelta
 import yfinance as yf
-import database.db as db
+import db
 
 # configure which stocks you want in the database
 SYMBOLS = [
@@ -53,7 +53,7 @@ def seed_assets_and_prices():
 
     OHLCV = open, high, low, close, volume
     """
-    print("\n── Seeding assets and prices ──────────────────────────────")
+    print("\n-------- Seeding assets and prices --------------------------------")
 
     end_date   = datetime.today()
     start_date = end_date - timedelta(days=HISTORY_DAYS)
@@ -79,12 +79,12 @@ def seed_assets_and_prices():
             )
             price_rows_inserted += 1
 
-        print(f"    ✓ {price_rows_inserted} price rows inserted for {symbol}")
+        print(f"     {price_rows_inserted} price rows inserted for {symbol}")
 
 
 def seed_accounts():
     """inserts dummy trading accounts. returns the list of inserted account ids."""
-    print("\n── Seeding accounts ────────────────────────────────────────")
+    print("\n-------- Seeding accounts ----------------------------------------")
 
     account_ids = []
     for acct in ACCOUNTS:
@@ -93,7 +93,7 @@ def seed_accounts():
             cash_balance = acct["cash_balance"],
         )
         account_ids.append(account_id)
-        print(f"Account {account_id} — {acct['type']}, ${acct['cash_balance']:,.2f}")
+        print(f"Account {account_id} - {acct['type']}, ${acct['cash_balance']:,.2f}")
 
     return account_ids
 
@@ -108,7 +108,7 @@ def seed_trades(account_ids: list[int]):
       - BUY trades happen first; SELL trades only follow a BUY.
       - The account is never oversold (can't sell more than it bought).
     """
-    print("\n── Seeding trades ──────────────────────────────────────────")
+    print("\n------------ Seeding trades ------------------------")
 
     all_assets = [db.get_asset_by_symbol(s) for s, _ in SYMBOLS]
 
@@ -156,12 +156,12 @@ def seed_trades(account_ids: list[int]):
             else:
                 positions[asset_id] -= quantity
 
-            print(f"    {side:4s} {quantity:3d} × {asset['symbol']:5s} @ ${price:.2f}")
+            print(f"    {side:4s} {quantity:3d} x {asset['symbol']:5s} @ ${price:.2f}")
 
 
 def reset_all():
     """if re-seeding, then clear the database"""
-    print("\n── Resetting database ──────────────────────────────────────")
+    print("\n---- Resetting database ----------------------------------------")
     db.truncate_all()
     print("All tables cleared.")
 

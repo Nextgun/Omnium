@@ -12,13 +12,18 @@ The following need to be installed before running the application:
      - Verify install by opening a terminal and running: py --version
 
   2. MariaDB (https://mariadb.org/download)
+     - Open the link and click the download button. Leave all options default.
      - During installation:
          * Set a root password (you will need it in step 3)
-         * Leave the port as 3306
-         * Check "Install as service"
+         * Leave the TCP port as 3306
+         * Check "Install as service" (should be checked by default)
      - After installation, add MariaDB to PATH:
-         * Bin can be found at: C:\Program Files\MariaDB 12.x\bin
-         * Add it via System Properties -> Environment Variables -> System Variables -> Path
+         * On Windows: 
+          * Step 1: Type in search bar "Edit environment variables for your account" and click on first result
+          * Step 2: Double click on Path variables
+          * Step 3: Click "New" button
+          * Step 4: Type "C:\Program Files\MariaDB 12.2\bin" (without double quotes) and hit Enter
+
 
 
 --------------------------------------------------------------------------------
@@ -28,7 +33,8 @@ STEP 1 — Clone the repository
   Open a terminal and run:
 
     git clone https://github.com/Nextgun/Omnium.git
-    cd to where you git cloned the repo
+    cd Omnium
+    git checkout -b database origin/database
 
 
 --------------------------------------------------------------------------------
@@ -49,7 +55,7 @@ STEP 2 — Install Python dependencies
 STEP 3 — Configure the database connection
 --------------------------------------------------------------------------------
 
-  Open db.py in a text editor and update the DB_CONFIG block near the top
+  Open database/db.py in a text editor and update the DB_CONFIG block near the top
   to match your local MariaDB setup:
 
     DB_CONFIG = {
@@ -71,6 +77,8 @@ STEP 4 — Create the database and tables
 
         mariadb -u root -p
 
+      (If this command hangs in Git Bash, try running in Command Prompt instead.)
+
       Enter your password when prompted. Then run:
 
         CREATE DATABASE omnium_database;
@@ -78,7 +86,7 @@ STEP 4 — Create the database and tables
 
   4b. From the project folder, run the schema file to create the tables:
 
-        mariadb -u root -p omnium_database < schema.sql
+        mariadb -u root -p omnium_database < database/schema.sql
 
 
 --------------------------------------------------------------------------------
@@ -88,7 +96,7 @@ STEP 5 — Seed the database with stock data
   This step fetches real historical stock data from Yahoo Finance and
   populates the database with accounts and trades for testing.
 
-    py seed.py
+    py database/seed.py
 
   Expected output ends with: "Seed complete."
   This takes roughly 30–60 seconds depending on your Internet.
@@ -98,9 +106,7 @@ STEP 5 — Seed the database with stock data
 STEP 6 — Run the application
 --------------------------------------------------------------------------------
 
-    py main.py
-
-  (Replace main.py with whatever the application entry point is.)
+    py run_auth_system.py
 
 
 --------------------------------------------------------------------------------
@@ -109,6 +115,7 @@ COMMON TROUBLESHOOTING SOLUTIONS
 
   "mariadb is not recognized"
     MariaDB's bin folder is not in PATH. See the PATH step under Prerequisites.
+    or: You need to open a new terminal after adding MariaDB to your PATH.
 
   "python / py is not recognized"
     Python is not in PATH. Reinstall Python and check "Add Python to PATH".
