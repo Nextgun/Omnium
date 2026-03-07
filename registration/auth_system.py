@@ -291,7 +291,7 @@ class UserInterface:
         password = input("Enter desired password: ").strip()
         
         success, message = self.auth.register(username, password)
-        print(f"\n{'✓' if success else '✗'} {message}")
+        print(f"\n{'Good' if success else 'X'} {message}")
     
     def handle_login(self) -> None:
         """Handle user login."""
@@ -300,7 +300,7 @@ class UserInterface:
         password = input("Enter password: ").strip()
         
         success, message = self.auth.login(username, password)
-        print(f"\n{'✓' if success else '✗'} {message}")
+        print(f"\n{'Good' if success else 'X'} {message}")
     
     def run(self) -> None:
         """Run the main application loop."""
@@ -336,7 +336,7 @@ class UserInterface:
                     print("Logged out successfully")
                 elif choice == "2":
 
-                    print("\n✓ Access Granted - Launching Trading Platform...")
+                    print("\nAccess Granted - Launching Trading Platform...")
 
                     # Add your trading platform code here
 

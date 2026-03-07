@@ -15,7 +15,7 @@ import mariadb
 import sys
 from datetime import datetime
 
-# mariaDB setup. change this if needed, but it should work by default.
+# mariaDB setup. change this if needed
 DB_CONFIG = {
     "host":     "localhost",
     "port":     3306,
