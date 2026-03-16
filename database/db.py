@@ -1,7 +1,7 @@
 """
 ==========================
 db.py - abstraction layer for interacting with the database
-author: 
+author: Ayesha Khan
 data created: 2/15/2026
 date last modified: 3/6/2026
 =====================================
@@ -537,5 +537,25 @@ def reset_lockout(username: str) -> None:
         conn.commit()
     except Exception as e:
         print(f"[db] reset_lockout error: {e}")
+    finally:
+        conn.close()
+
+# FOR TRADING ALGORITHM LOGIC ----------------------
+def get_avg_buy_price(account_id: int, asset_id: int) -> float | None:
+    """Returns average cost basis for all BUY trades on an asset."""
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """SELECT SUM(price * quantity) / SUM(quantity)
+               FROM trades
+               WHERE account_id = ? AND asset_id = ? AND side = 'BUY'""",
+            (account_id, asset_id)
+        )
+        row = cursor.fetchone()
+        return float(row[0]) if row and row[0] is not None else None
+    except Exception as e:
+        print(f"[db] get_avg_buy_price error: {e}")
+        return None
     finally:
         conn.close()

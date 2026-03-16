@@ -2,7 +2,7 @@
 ==========================
 seed.py - database seeder
 author: Ayesha Khan
-data created: 2/15/2026
+date created: 2/15/2026
 date last modified: 3/6/2026
 ==========================
 
@@ -53,6 +53,7 @@ def seed_assets_and_prices():
 
     OHLCV = open, high, low, close, volume
     """
+    
     print("\n-------- Seeding assets and prices --------------------------------")
 
     end_date   = datetime.today()

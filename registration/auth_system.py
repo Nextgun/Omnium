@@ -258,6 +258,8 @@ class RegistrationSystem:
         return self.current_user if self.current_user else "None"
 
 
+# this is a temporary terminal based interface.
+# use for dev and testing.
 class UserInterface:
     """Command-line interface for the registration system."""
     
@@ -271,19 +273,113 @@ class UserInterface:
         print("Welcome to Omnium - Trading Software")
         print("=" * 50)
         
+        # options if user is logged in
         if self.auth.is_logged_in():
+            # andrew's UI here            
             print(f"Logged in as: {self.auth.get_current_user()}")
             print("1. Logout")
             print("2. Access Trading Platform")
             print("3. Search Securities")
-            print("4. Exit")
+            print("4. Get Security Details")
+            print("5. Execute Trade")
+            print("6. Update Trading Algorithm")
+            print("7. View Status")
+            print("0. Exit")
+
+        # options if user is not logged in
         else:
             print("1. Register")
             print("2. Login")
-            print("3. Exit")
+            print("0. Exit")
         
         print("=" * 50)
-    
+
+    def run(self) -> None:
+        """Run the main application loop."""
+        while True:
+            self.display_menu()
+            # andrew's UI here
+            choice = input("Select an option: ").strip()
+
+            if not self.auth.is_logged_in():
+
+                if choice == "1":
+                    self.handle_registration()
+
+                elif choice == "2":
+                    self.handle_login()
+
+                elif choice == "0":
+                    print("\nGoodbye!")
+                    break
+
+                else:
+                    print("Invalid option. Please try again.")
+        
+            else:
+
+                if choice == "1":
+                    self.auth.logout()
+                    # andrew's UI here
+                    print("Logged out successfully")
+
+                # this is the gateway into main menu of omnium interface
+                elif choice == "2":
+                    # andrew's UI here
+                    from stub import stubby_stub
+                    print("\nAccess Granted - Launching Trading Platform...")
+                    stubby_stub()
+
+                # search companies 
+                elif choice == "3":
+                    # andrew's UI here                    
+                    from search import search_securities
+                    search = input("Enter search term:").strip()
+
+                    results = search_securities(search) 
+                    if results:
+                        for r in results:
+                            print(f"  {r['symbol']:<8} {r['name']}")
+                    else:
+                        "no results."
+
+                # enter exact ticker symbol -> get all details     
+                elif choice == "4":
+                    from search import get_security_details
+                    symbol = input("Type exact symbol here:").strip()
+                    results = get_security_details(symbol) 
+                    print(results)
+                    # andrew's UI here
+
+                elif choice == "5":
+                    # andrew's UI here                    
+                    print("beep boop this will call run_tick")
+                    from trading_logic.orchestrator import run_tick 
+                    results = run_tick(1, 1) 
+                    # account id = 1, a paper trading account
+                    # asset id = 1 which is apple
+                    print(results)
+
+                elif choice == "6":
+                    print("beep boop this will call update_algorithm")
+                    # andrew's UI here
+
+                elif choice == "7":
+                    print("beep boop this will call get_status")
+                    # andrew's UI here
+
+                # exit
+                elif choice == "0":
+                    self.auth.logout()
+                    print("Goodbye!")
+                    # andrew's UI here
+
+                    break
+
+                else:
+                    print("Invalid option. Please try again.")
+        
+    # registration stuff -------------------------------------------------------
     def handle_registration(self) -> None:
         """Handle user registration."""
         print("\n--- Registration ---")
@@ -301,62 +397,9 @@ class UserInterface:
         
         success, message = self.auth.login(username, password)
         print(f"\n{'Good' if success else 'X'} {message}")
-    
-    def run(self) -> None:
-        """Run the main application loop."""
-        while True:
-
-            self.display_menu()
-
-            choice = input("Select an option (1-3): ").strip()
-
-            
-            if not self.auth.is_logged_in():
-
-                if choice == "1":
-                    self.handle_registration()
-
-                elif choice == "2":
-
-                    self.handle_login()
-
-                elif choice == "3":
-
-                    print("\nGoodbye!")
-
-                    break
-
-                else:
-                    print("Invalid option. Please try again.")
-            else:
-
-                if choice == "1":
-                    self.auth.logout()
-
-                    print("Logged out successfully")
-                elif choice == "2":
-
-                    print("\nAccess Granted - Launching Trading Platform...")
-
-                    # Add your trading platform code here
-
-                elif choice == "3":
-                    "Enter your search query here."
-                    # entry point for search.py
 
 
-                elif choice == "4":
-
-                    self.auth.logout()
-                    print("Goodbye!")
-
-                    break
-                else:
-
-                    print("Invalid option. Please try again.")
-
-
-
+# to test: run py -m registration.auth_system in terminal
 if __name__ == "__main__":
     app = UserInterface()
     app.run()

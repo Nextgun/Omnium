@@ -1,4 +1,19 @@
-# configure_trading_algo.py
+"""
+==========================
+search.py - search function
+author: Joseph Duff
+date created: 3/8/2026
+date last modified: 3/16/2026
+==========================
+
+omnium user can configure the trading algorithm that they use 
+which will automate the buying and selling of assets according
+to the algo. this is a stats-based algorithm
+
+algorithm rules:
+mean reversion and momentum/trend- following algorithms
+
+"""
 
 from dataclasses import dataclass
 
@@ -99,7 +114,7 @@ class TradingAlgorithm:
         return take_profit or stop_loss_hit
 
 
-# Example usage (optional test)
+# to test: run py trading_algorithm.py in terminal
 if __name__ == "__main__":
     algo = TradingAlgorithm()
 
