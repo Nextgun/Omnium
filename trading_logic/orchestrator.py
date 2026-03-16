@@ -43,18 +43,23 @@ def run_tick(account_id: int, asset_id: int) -> str:
     if not account:
         return "Account not found."
 
-    # BUY LOGIC
+    # BUY LOGIC ------------------------
+    # this adds a guard to prevent buying beyond max allowed shares 
     if position < algo.config.max_position:
         ref = _get_reference_price(asset_id)
         if ref and algo.should_buy(ref, current_price):
+
+            # prevents buying more than is affordable
             affordable = int(account["cash_balance"] // current_price)
+
             shares = min(algo.config.max_position - position, affordable)
             if shares > 0:
                 db.log_trade(account_id, asset_id, "BUY", shares, current_price)
                 db.update_cash_balance(account_id, account["cash_balance"] - shares * current_price)
                 return f"BUY {shares} shares @ ${current_price:.2f}"
 
-    # SELL LOGIC
+    # SELL LOGIC -------------------------
+    # this prevents selling shares that you don't own
     if position > 0:
         avg_cost = db.get_avg_buy_price(account_id, asset_id)
         if avg_cost and algo.should_sell(current_price, avg_cost):
@@ -64,7 +69,7 @@ def run_tick(account_id: int, asset_id: int) -> str:
 
     return f"No action. Price: ${current_price:.2f}, Position: {position} shares."
 
-
+# not implementing this in the terminal UI yet but it will be in Andrew's UI
 def update_algorithm(
     buy_threshold:  float | None = None,
     sell_threshold: float | None = None,

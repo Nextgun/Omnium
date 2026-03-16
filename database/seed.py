@@ -19,22 +19,47 @@ safe to re-run; it will clear any existing data in it first
 import random
 from datetime import datetime, timedelta
 import yfinance as yf
-import db
+from . import db
 
-# configure which stocks you want in the database
+# the 30 dow jones industrial average companies
 SYMBOLS = [
-    ("AAPL",  "Apple Inc."),
-    ("MSFT",  "Microsoft Corporation"),
-    ("GOOGL", "Alphabet Inc."),
-    ("AMZN",  "Amazon.com Inc."),
-    ("TSLA",  "Tesla Inc."),
+        ("AAPL", "Apple"),
+        ("MSFT", "Microsoft"),
+        ("JPM", "JPMorgan"),
+        ("V", "Visa"),
+        ("WMT", "Walmart"),
+        ("JNJ", "Johnson & Johnson"),
+        ("PG", "Procter & Gamble"),
+        ("UNH", "UnitedHealth"),
+        ("HD", "Home Depot"),
+        ("GS", "Goldman Sachs"),
+        ("BA", "Boeing"),
+        ("MRK", "Merck"),
+        ("AXP", "American Express"),
+        ("DIS", "Disney"),
+        ("CAT", "Caterpillar"),
+        ("MCD", "McDonald's"),
+        ("KO", "Coca-Cola"),
+        ("MMM", "3M"),
+        ("CSCO", "Cisco"),
+        ("CVX", "Chevron"),
+        ("NKE", "Nike"),
+        ("INTC", "Intel"),
+        ("MU", "Micron"),
+        ("VZ", "Verizon"),
+        ("DOW", "Dow Inc"),
+        ("IRM", "Iron Mountain"),
+        ("CRM", "Salesforce"),
+        ("VRTX", "Vertex"),
+        ("TRV", "Travelers"),
+        ("IBM", "IBM"),
 ]
 
 # how many calendar days of price history to fetch for each stock
 HISTORY_DAYS = 90
 
 # initializing some dummys
-
+# for later: new account will be appended when a user registers
 ACCOUNTS = [
     {"type": "paper", "cash_balance": 10000.00},
     {"type": "paper", "cash_balance": 25000.00},
