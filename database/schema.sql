@@ -1,3 +1,5 @@
+-- schema.sql
+
 CREATE TABLE IF NOT EXISTS assets (
     id     INT AUTO_INCREMENT PRIMARY KEY,
     symbol VARCHAR(10)  NOT NULL,
