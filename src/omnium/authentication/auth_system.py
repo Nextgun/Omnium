@@ -7,8 +7,8 @@ date last modified: 3/6/2026
 '''
 
 import hashlib
-import database.db as db
-import search as search
+import src.omnium.data.db as db
+import src.omnium.search.search as search
 from typing import Tuple
 from datetime import datetime, timedelta
 
