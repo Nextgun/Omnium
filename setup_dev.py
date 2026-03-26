@@ -9,8 +9,7 @@ Steps:
     2. Create/update the 'omnium-dev' conda environment
     3. Install the omnium package in editable mode
     4. Download PlantUML jar if missing
-    5. Install/update git pre-commit hook (PlantUML + ruff linting)
-    6. Install VS Code extensions
+    5. Install VS Code extensions
 
 Usage:
     python setup_dev.py
@@ -30,7 +29,6 @@ from devtools.utils import (
     ensure_miniconda,
     ensure_conda_env,
     ensure_plantuml_jar,
-    ensure_pre_commit_hook,
     ensure_vscode_extensions,
 )
 
@@ -133,11 +131,12 @@ def main() -> int:
         jar_name=CONFIG["plantuml_jar_name"],
     )
 
-    # 5. Git pre-commit hook (PlantUML rendering + ruff linting)
-    ensure_pre_commit_hook(
-        repo_root=REPO_ROOT,
-        checks=CONFIG["git_hook_checks"],
-    )
+    # 5. Git pre-commit hook — disabled for now (some team members
+    #    struggle with git hooks). Revisit post-deadline or move to CI.
+    # ensure_pre_commit_hook(
+    #     repo_root=REPO_ROOT,
+    #     checks=CONFIG["git_hook_checks"],
+    # )
 
     # 6. VS Code extensions
     ensure_vscode_extensions(CONFIG["vscode_extensions"])
