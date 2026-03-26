@@ -11,17 +11,23 @@ Other modules calls these functions and gets back plain Python dicts.
 Install the driver once with:  pip install mariadb
 """
 
+import os
 import mariadb
 import sys
 from datetime import datetime
+from dotenv import load_dotenv
 
-# mariaDB setup. change this if needed
+load_dotenv()
+
+# mariaDB setup — reads from .env file, falls back to defaults.
+# Each developer creates their own .env from .env.example.
+# See .env.example for setup instructions.
 DB_CONFIG = {
-    "host":     "localhost",
-    "port":     3306,
-    "user":     "root",
-    "password": "omnom3",
-    "database": "omnium_database",
+    "host":     os.getenv("OMNIUM_DB_HOST", "localhost"),
+    "port":     int(os.getenv("OMNIUM_DB_PORT", "3306")),
+    "user":     os.getenv("OMNIUM_DB_USER", "root"),
+    "password": os.getenv("OMNIUM_DB_PASSWORD", ""),
+    "database": os.getenv("OMNIUM_DB_NAME", "omnium_database"),
 }
 
 
