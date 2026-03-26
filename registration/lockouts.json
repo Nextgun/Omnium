@@ -1,0 +1,10 @@
+{
+    "user1": {
+        "failed_attempts": 3,
+        "lockout_until": "2026-03-02T22:13:57.675401"
+    },
+    "user2": {
+        "failed_attempts": 0,
+        "lockout_until": null
+    }
+}
