@@ -1,3 +1,6 @@
+# Environment variables (local passwords — never commit)
+.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

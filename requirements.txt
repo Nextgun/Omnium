@@ -1,42 +1,20 @@
 # ══════════════════════════════════════════════════════════════
-#  Omnium — Unified Development Requirements
+#  Omnium — Python Dependencies
 #  Install: pip install -r requirements.txt
-#  Or:      pip install -e ".[dev]"   (uses pyproject.toml)
 # ══════════════════════════════════════════════════════════════
 
-# ── Core (application) ──
-sqlalchemy>=2.0             # ORM + database engine
-alembic>=1.12               # Database migrations
-psycopg2-binary>=2.9        # PostgreSQL driver
-pydantic>=2.0               # Data validation schemas
+# ── Core ──
+flask>=3.0                  # REST API framework
+mariadb>=1.1                # MariaDB connector (requires MariaDB C connector)
+python-dotenv>=1.0          # Load .env files for local config
 
-# ── Market Data ──
-websockets>=12.0            # WebSocket client for live data
-httpx>=0.25                 # Async HTTP client for REST APIs
-# alpaca-py>=0.13           # Uncomment when using Alpaca broker API
-# yfinance>=0.2             # Uncomment for Yahoo Finance historical data
-
-# ── Algorithms ──
-numpy>=1.26                 # Numerical computation
-pandas>=2.1                 # Data manipulation
-scikit-learn>=1.3           # ML models (Random Forest, etc.)
-joblib>=1.3                 # Model serialization
-
-# ── Scheduling ──
-# apscheduler>=3.10         # Optional: advanced scheduler (we have a built-in one)
-
-# ── UI / API ──
-# fastapi>=0.104            # Uncomment when building the REST API
-# uvicorn>=0.24             # Uncomment: ASGI server for FastAPI
-
-# ── Environment ──
-python-dotenv>=1.0          # Load .env files for local development
+# ── Data ──
+yfinance>=0.2               # Yahoo Finance — used by seed.py
 
 # ── Dev & Testing ──
 pytest>=7.4
 pytest-cov>=4.1
-pytest-benchmark>=4.0       # Function-level and pipeline performance benchmarks
-ruff>=0.4                   # Linter (replaces flake8, isort, pyupgrade, etc.)
+ruff>=0.4                   # Linter
 
 # ── DevTools ──
 watchdog>=3.0               # PlantUML file watcher
