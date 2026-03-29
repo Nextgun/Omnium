@@ -19,7 +19,7 @@ safe to re-run; it will clear any existing data in it first
 import random
 from datetime import datetime, timedelta
 import yfinance as yf
-from . import db
+import db
 
 # the 30 dow jones industrial average companies
 SYMBOLS = [
