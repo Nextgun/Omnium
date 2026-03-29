@@ -106,7 +106,7 @@ STEP 5 - Seed the database with stock data
 STEP 6 - Run the application
 --------------------------------------------------------------------------------
 
-    py run_auth_system.py
+    py -m registration.auth_system
 
 
 --------------------------------------------------------------------------------
