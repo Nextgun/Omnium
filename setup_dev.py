@@ -5,7 +5,7 @@ setup_dev.py — Developer Environment Setup (idempotent).
 Run this once after cloning the repo. Safe to re-run at any time.
 
 Steps:
-    1. Ensure Miniconda is installed
+    1. Ensure conda is installed (Anaconda, Miniconda, or Miniforge)
     2. Create/update the 'omnium-dev' conda environment
     3. Install the omnium package in editable mode
     4. Download PlantUML jar if missing
@@ -26,7 +26,7 @@ import sys
 # without any sys.path hacking.
 # ---------------------------------------------------------------------------
 from devtools.utils import (
-    ensure_miniconda,
+    ensure_conda,
     ensure_conda_env,
     ensure_plantuml_jar,
     ensure_vscode_extensions,
@@ -110,8 +110,8 @@ def main() -> int:
     log.info("  Omnium Developer Setup (idempotent)")
     log.info("=" * 60)
 
-    # 1. Miniconda
-    conda_path = ensure_miniconda()
+    # 1. Conda (Anaconda, Miniconda, or Miniforge)
+    conda_path = ensure_conda()
 
     # 2. Conda environment + deps
     ensure_conda_env(
@@ -146,7 +146,7 @@ def main() -> int:
     log.info("")
     log.info("  Next steps:")
     log.info("    conda activate %s", CONFIG["conda_env_name"])
-    log.info("    python -m omnium          # Run the app")
+    log.info("    python -m flask --app src.omnium.api run  # Run the API")
     log.info("    pytest                    # Run tests")
     log.info("    pytest tests/benchmarks   # Run benchmarks")
     log.info("=" * 60)

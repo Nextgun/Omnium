@@ -1,6 +1,7 @@
 """
-conda.py — Miniconda detection, installation, and environment management.
+conda.py — Conda detection, installation, and environment management.
 
+Works with Anaconda, Miniconda, or Miniforge — any conda distribution.
 Every function is idempotent: calling it when the desired state already
 exists logs a skip message and returns immediately.
 """
@@ -19,13 +20,12 @@ log = logging.getLogger(__name__)
 # Public API
 # ---------------------------------------------------------------------------
 
-def ensure_miniconda() -> str:
+def ensure_conda() -> str:
     """
     Return the path to a working `conda` executable.
 
-    If conda is already on $PATH, return it immediately.
-    Otherwise, download and install Miniconda for the current platform
-    into ~/miniconda3, then return the new conda path.
+    If conda (Anaconda, Miniconda, etc.) is already on $PATH, return it.
+    Otherwise, download and install Miniconda as a fallback.
     """
     existing = _find_conda()
     if existing:
@@ -42,6 +42,10 @@ def ensure_miniconda() -> str:
 
     log.info("Miniconda installed: %s", conda_path)
     return conda_path
+
+
+# Keep old name as alias so nothing breaks
+ensure_miniconda = ensure_conda
 
 
 def ensure_conda_env(
@@ -154,11 +158,13 @@ def _env_exists(conda_path: str, env_name: str) -> bool:
 
 def _env_pip(conda_path: str, env_name: str) -> str:
     """Return the pip executable inside a conda environment."""
+    # Use 'where' on Windows, 'which' on Unix
+    which_cmd = "where" if platform.system() == "Windows" else "which"
     result = subprocess.run(
-        [conda_path, "run", "-n", env_name, "which", "pip"],
+        [conda_path, "run", "-n", env_name, which_cmd, "pip"],
         capture_output=True, text=True,
     )
-    pip_path = result.stdout.strip()
+    pip_path = result.stdout.strip().splitlines()[0] if result.stdout.strip() else ""
     if pip_path and os.path.isfile(pip_path):
         return pip_path
 
