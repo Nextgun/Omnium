@@ -91,6 +91,30 @@ All endpoints (see docs/api-guide.md for full details):
 - Type hints on all function signatures
 - Docstrings on all public functions
 
+## Delivery Plan (v0.1.0)
+
+### Branch: `create-exe` (off `integrate-gui`)
+Goal: Package Omnium as a distributable desktop app that runs on localhost.
+
+1. **WPF publish config** — add `PublishSingleFile`, `SelfContained`, version 0.1.0 to csproj
+2. **Launcher script** (`launch_omnium.bat`) — starts MariaDB service, Flask API in background, then launches WPF exe
+3. **Build script** (`build.bat`) — runs `dotnet publish` to produce the exe in a `dist/` folder
+4. **Update .gitignore** — add `dist/` folder
+5. **Version info** — set 0.1.0 in csproj, `__init__.py`, and launcher
+
+### Branch: `expand-gui` (off `create-exe`)
+Goal: Polish the GUI for end-user demo. Team can continue iterating on this branch.
+
+1. **Login/Register screen** — show before main window, call /auth/register and /auth/login
+2. **Real-time price refresh** — auto-refresh selected asset price every 10s
+3. **Portfolio overview panel** — show all positions across assets with total P&L
+4. **Trade confirmation dialog** — confirm before executing a trade tick
+5. **Backtest results table** — show trade log in a DataGrid instead of plain text
+6. **Evaluation results table** — DataGrid with strategy comparison columns
+7. **Error handling UX** — show user-friendly messages when API is down or requests fail
+8. **Status bar** — bottom bar showing connection status, last action, and timestamp
+9. **About/Help panel** — team name, version, course info
+
 ## Important Notes
 
 - DB credentials are in .env (never commit .env, use .env.example as template)
