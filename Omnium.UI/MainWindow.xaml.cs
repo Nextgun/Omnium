@@ -58,6 +58,8 @@ public partial class MainWindow : Window
     {
         if (_selectedAssetId <= 0) return;
 
+        try
+        {
         var price = await _api.GetLatestPriceAsync(_selectedAssetId);
         if (price != null)
             AssetPriceText.Text = $"${price.Close:F2}";
@@ -77,6 +79,11 @@ public partial class MainWindow : Window
 
         await RefreshAccountInfoAsync();
         StatusBarText.Text = $"Last refresh: {DateTime.Now:HH:mm:ss}";
+        }
+        catch
+        {
+            StatusBarText.Text = $"Refresh failed at {DateTime.Now:HH:mm:ss} — API may be offline";
+        }
     }
 
     // ── Navigation ──
@@ -117,7 +124,8 @@ public partial class MainWindow : Window
         EvalAssetLabel.Text = _selectedAssetId > 0
             ? $"Asset: {_selectedSymbol} (ID: {_selectedAssetId})"
             : "No asset selected — search for one first";
-        EvalResultText.Text = "";
+        EvalSummaryText.Text = "";
+        EvalResultGrid.Visibility = Visibility.Collapsed;
         ShowPanel("evaluate");
     }
 
@@ -344,38 +352,42 @@ public partial class MainWindow : Window
     {
         if (_selectedAssetId <= 0)
         {
-            EvalResultText.Text = "Select an asset first.";
+            EvalSummaryText.Text = "Select an asset first.";
             return;
         }
 
-        EvalResultText.Text = "Comparing strategies...";
+        EvalSummaryText.Text = "Comparing strategies...";
+        EvalResultGrid.Visibility = Visibility.Collapsed;
         var result = await _api.CompareAlgorithmsAsync(_selectedAssetId);
         if (result.HasValue)
         {
             var json = result.Value;
-            var lines = new System.Text.StringBuilder();
-            lines.AppendLine($"Bars tested: {json.GetProperty("bars_tested")}");
-            lines.AppendLine($"Best strategy: {json.GetProperty("best_strategy")}");
-            lines.AppendLine($"Best return: {json.GetProperty("best_return_pct")}%");
-            lines.AppendLine();
+            EvalSummaryText.Text = $"Best: {json.GetProperty("best_strategy")} ({json.GetProperty("best_return_pct")}% return) | {json.GetProperty("bars_tested")} bars";
 
+            var items = new List<EvalRow>();
             if (json.TryGetProperty("results", out var results))
             {
                 foreach (var prop in results.EnumerateObject())
                 {
                     var r = prop.Value;
-                    lines.AppendLine($"── {prop.Name} ──");
-                    lines.AppendLine($"  Return: {r.GetProperty("return_pct")}%");
-                    lines.AppendLine($"  Total Value: ${r.GetProperty("total_value")}");
-                    lines.AppendLine($"  Trades: {r.GetProperty("total_trades")}");
+                    items.Add(new EvalRow
+                    {
+                        Strategy = prop.Name,
+                        ReturnPct = r.GetProperty("return_pct").ToString() + "%",
+                        TotalValue = "$" + r.GetProperty("total_value"),
+                        Trades = r.GetProperty("total_trades").ToString(),
+                        Buys = r.TryGetProperty("buys", out var b) ? b.ToString() : "--",
+                        Sells = r.TryGetProperty("sells", out var s) ? s.ToString() : "--"
+                    });
                 }
             }
-
-            EvalResultText.Text = lines.ToString();
+            EvalResultGrid.ItemsSource = items;
+            EvalResultGrid.Visibility = Visibility.Visible;
         }
         else
         {
-            EvalResultText.Text = "Evaluation failed — is the API running?";
+            EvalSummaryText.Text = "Evaluation failed — is the API running?";
+            EvalSummaryText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
         }
     }
 
@@ -394,4 +406,14 @@ public class PortfolioItem
     public string Shares { get; set; } = "";
     public string Value { get; set; } = "";
     public string PnL { get; set; } = "";
+}
+
+public class EvalRow
+{
+    public string Strategy { get; set; } = "";
+    public string ReturnPct { get; set; } = "";
+    public string TotalValue { get; set; } = "";
+    public string Trades { get; set; } = "";
+    public string Buys { get; set; } = "";
+    public string Sells { get; set; } = "";
 }

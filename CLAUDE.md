@@ -105,15 +105,15 @@ Goal: Package Omnium as a distributable desktop app that runs on localhost.
 ### Branch: `expand-gui` (off `create-exe`)
 Goal: Polish the GUI for end-user demo. Team can continue iterating on this branch.
 
-1. **Login/Register screen** — show before main window, call /auth/register and /auth/login
-2. **Real-time price refresh** — auto-refresh selected asset price every 10s
-3. **Portfolio overview panel** — show all positions across assets with total P&L
-4. **Trade confirmation dialog** — confirm before executing a trade tick
-5. **Backtest results table** — show trade log in a DataGrid instead of plain text
-6. **Evaluation results table** — DataGrid with strategy comparison columns
-7. **Error handling UX** — show user-friendly messages when API is down or requests fail
-8. **Status bar** — bottom bar showing connection status, last action, and timestamp
-9. **About/Help panel** — team name, version, course info
+1. ~~**Login/Register screen**~~ — DONE (LoginWindow with tab toggle, wired into App startup)
+2. ~~**Real-time price refresh**~~ — DONE (10s DispatcherTimer auto-refreshes price, signal, account)
+3. ~~**Portfolio overview panel**~~ — DONE (shows positions, shares, value, cost basis)
+4. ~~**Trade confirmation dialog**~~ — DONE (MessageBox confirmation before tick)
+5. ~~**Backtest results table**~~ — DONE (DataGrid with bar/action/price/shares/cash columns)
+6. ~~**Evaluation results table**~~ — DONE (DataGrid with strategy/return/value/trades columns)
+7. ~~**Error handling UX**~~ — DONE (try-catch on auto-refresh, status bar messages)
+8. ~~**Status bar**~~ — DONE (bottom bar with last refresh timestamp + version)
+9. ~~**About/Help panel**~~ — DONE (team name, version, features, architecture)
 
 ## Important Notes
 
