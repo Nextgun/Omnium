@@ -209,6 +209,9 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# Build output
+dist/
+
 # Visual Studio local cache
 .vs/
 
