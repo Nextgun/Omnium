@@ -208,3 +208,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Visual Studio local cache
+.vs/
+
+# Build outputs
+bin/
+obj/
