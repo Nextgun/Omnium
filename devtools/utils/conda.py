@@ -84,8 +84,29 @@ def ensure_conda_env(
 # ---------------------------------------------------------------------------
 
 def _find_conda() -> str | None:
-    """Return the full path to conda if it's on $PATH, else None."""
-    return shutil.which("conda")
+    """Return the full path to conda if it's on $PATH or in common install locations."""
+    found = shutil.which("conda")
+    if found:
+        return found
+
+    # Check common install locations (conda often isn't on PATH on Windows)
+    home = Path.home()
+    candidates = [
+        home / "anaconda3" / "Scripts" / "conda.exe",
+        home / "miniconda3" / "Scripts" / "conda.exe",
+        home / "miniforge3" / "Scripts" / "conda.exe",
+        home / "anaconda3" / "bin" / "conda",
+        home / "miniconda3" / "bin" / "conda",
+        home / "miniforge3" / "bin" / "conda",
+        Path("C:/ProgramData/anaconda3/Scripts/conda.exe"),
+        Path("C:/ProgramData/miniconda3/Scripts/conda.exe"),
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            log.info("Found conda at common location: %s", candidate)
+            return str(candidate)
+
+    return None
 
 
 def _is_unix() -> bool:
