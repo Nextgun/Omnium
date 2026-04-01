@@ -1,21 +1,24 @@
 """
 setup_db.py — One-command database setup for Omnium.
 
-Creates the omnium_database if it doesn't exist, runs the schema,
-and optionally seeds DJIA stock data.
+Installs MariaDB if not found, creates the omnium_database,
+runs the schema, and optionally seeds DJIA stock data.
 
 Usage:
     python setup_db.py            # Create DB + schema only
     python setup_db.py --seed     # Create DB + schema + seed stock data
 
 Requires:
-    - MariaDB running on the host specified in .env (default: localhost:3306)
     - pip install mariadb python-dotenv
     - A .env file with OMNIUM_DB_USER and OMNIUM_DB_PASSWORD (see .env.example)
 """
 
 import os
+import platform
+import shutil
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -33,6 +36,148 @@ def get_config() -> dict:
     }
 
 
+# ── MariaDB Installation ──
+
+
+def _is_mariadb_running(config: dict) -> bool:
+    """Try to connect to MariaDB. Returns True if reachable."""
+    try:
+        import mariadb
+        conn = mariadb.connect(**config)
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+
+def _find_mariadb_service() -> bool:
+    """Check if MariaDB is installed as a Windows service."""
+    if platform.system() != "Windows":
+        return shutil.which("mysqld") is not None or shutil.which("mariadbd") is not None
+
+    # Check Windows services
+    result = subprocess.run(
+        ["sc", "query", "MariaDB"],
+        capture_output=True, text=True,
+    )
+    return "MariaDB" in result.stdout
+
+
+def _start_mariadb_service() -> bool:
+    """Try to start the MariaDB service (Windows)."""
+    if platform.system() != "Windows":
+        print("[setup_db] On Linux/Mac, start MariaDB with: sudo systemctl start mariadb")
+        return False
+
+    print("[setup_db] Starting MariaDB service...")
+    result = subprocess.run(
+        ["net", "start", "MariaDB"],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        print("[setup_db] MariaDB service started.")
+        time.sleep(2)  # Give it a moment to accept connections
+        return True
+
+    # net start might need admin — try sc
+    print("[setup_db] Could not start MariaDB service automatically.")
+    print("  Try running this in an admin terminal: net start MariaDB")
+    print("  Or start it from Services (Win+R -> services.msc)")
+    return False
+
+
+def install_mariadb(config: dict) -> None:
+    """Install MariaDB using winget (Windows) if not already installed."""
+    if _is_mariadb_running(config):
+        print("[setup_db] MariaDB is already running.")
+        return
+
+    # Check if installed but not running
+    if _find_mariadb_service():
+        print("[setup_db] MariaDB is installed but not running.")
+        if _start_mariadb_service():
+            return
+        sys.exit(1)
+
+    # Not installed — install via winget
+    if platform.system() != "Windows":
+        print("[setup_db] MariaDB is not installed.")
+        print("  Install it with your package manager:")
+        print("    Ubuntu/Debian: sudo apt install mariadb-server")
+        print("    Mac:           brew install mariadb")
+        sys.exit(1)
+
+    if not shutil.which("winget"):
+        print("[setup_db] MariaDB is not installed and winget is not available.")
+        print("  Please install MariaDB manually from: https://mariadb.org/download/")
+        sys.exit(1)
+
+    password = config["password"]
+    print("[setup_db] Installing MariaDB via winget...")
+    print("  This may take a few minutes and require admin approval.")
+    print()
+
+    # winget install with root password
+    cmd = [
+        "winget", "install", "MariaDB.Server",
+        "--accept-package-agreements",
+        "--accept-source-agreements",
+    ]
+
+    result = subprocess.run(cmd, capture_output=False)
+
+    if result.returncode != 0:
+        print()
+        print("[setup_db] winget install failed or was cancelled.")
+        print("  You can install MariaDB manually from: https://mariadb.org/download/")
+        print(f"  Set the root password to: {password}")
+        sys.exit(1)
+
+    print()
+    print("[setup_db] MariaDB installed.")
+
+    # Wait for service to be available
+    print("[setup_db] Waiting for MariaDB service to start...")
+    _start_mariadb_service()
+
+    # After winget install, the root password may be empty.
+    # Try to set it to match .env
+    _set_root_password(config)
+
+
+def _set_root_password(config: dict) -> None:
+    """After fresh install, set root password to match .env."""
+    password = config["password"]
+    if not password:
+        return
+
+    try:
+        import mariadb
+
+        # Try connecting with no password (fresh install default)
+        try:
+            conn = mariadb.connect(
+                host=config["host"],
+                port=config["port"],
+                user=config["user"],
+                password="",
+            )
+            cursor = conn.cursor()
+            cursor.execute(f"ALTER USER 'root'@'localhost' IDENTIFIED BY '{password}'")
+            cursor.execute("FLUSH PRIVILEGES")
+            conn.commit()
+            conn.close()
+            print(f"[setup_db] Root password set to match .env.")
+        except mariadb.Error:
+            # Already has a password or can't connect — try with .env password
+            pass
+    except Exception:
+        pass
+
+
+# ── Database Setup ──
+
+
 def create_database(config: dict, db_name: str) -> None:
     """Create the database if it doesn't already exist."""
     import mariadb
@@ -48,9 +193,9 @@ def create_database(config: dict, db_name: str) -> None:
         print(f"[setup_db] Failed to create database: {e}")
         print()
         print("Troubleshooting:")
-        print("  1. Is MariaDB running?")
+        print("  1. Is MariaDB running? Check Services (Win+R -> services.msc)")
         print(f"  2. Can user '{config['user']}' connect to {config['host']}:{config['port']}?")
-        print("  3. Check your .env file (see .env.example)")
+        print("  3. Does the password in .env match your MariaDB root password?")
         sys.exit(1)
 
 
@@ -128,14 +273,23 @@ def main() -> None:
     db_name = os.getenv("OMNIUM_DB_NAME", "omnium_database")
     config = get_config()
 
-    print(f"[setup_db] Connecting to MariaDB at {config['host']}:{config['port']}...")
-    print(f"[setup_db] Target database: {db_name}")
+    print("[setup_db] Omnium Database Setup")
+    print(f"[setup_db] Target: {config['host']}:{config['port']} / {db_name}")
     print()
 
+    # Step 0: Ensure MariaDB is installed and running
+    install_mariadb(config)
+
+    # Step 1: Create database
     create_database(config, db_name)
+
+    # Step 2: Run schema
     run_schema(config, db_name)
+
+    # Step 3: Create user/lockout tables
     create_user_tables(config, db_name)
 
+    # Step 4: Seed data (optional)
     if "--seed" in sys.argv:
         seed_data()
 
