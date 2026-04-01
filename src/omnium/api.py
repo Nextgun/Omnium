@@ -13,14 +13,19 @@ from flask import Flask, jsonify, request
 
 from src.omnium.data import db
 from src.omnium.authentication.auth_system import RegistrationSystem
+from src.omnium.algorithms.switcher import AlgorithmSwitcher, AVAILABLE_ALGORITHMS
+from src.omnium.orchestration import orchestrator
+from src.omnium.backtesting.backtest import run_backtest
+from src.omnium.evaluation.compare import compare_algorithms
 
 
 def create_app() -> Flask:
     """App factory — creates and configures the Flask application."""
     app = Flask(__name__)
 
-    # Shared auth instance (holds no per-request state worth worrying about)
+    # Shared instances
     auth = RegistrationSystem()
+    switcher = AlgorithmSwitcher()
 
     # ── Health Check ──
 
@@ -100,6 +105,90 @@ def create_app() -> Flask:
         success, message = auth.login(data["username"], data["password"])
         status = 200 if success else 401
         return jsonify({"success": success, "message": message}), status
+
+    # ── Trading ──
+
+    @app.post("/trading/tick")
+    def trading_tick():
+        data = request.get_json()
+        if not data or "account_id" not in data or "asset_id" not in data:
+            return jsonify({"error": "account_id and asset_id are required"}), 400
+        result = orchestrator.tick(data["account_id"], data["asset_id"], switcher)
+        return jsonify({
+            "asset_id": result.asset_id,
+            "symbol": result.symbol,
+            "action": result.action,
+            "price": result.price,
+            "shares_held": result.shares_held,
+            "trade_executed": result.trade_executed,
+            "message": result.message,
+        })
+
+    @app.get("/trading/status/<int:account_id>/<int:asset_id>")
+    def trading_status(account_id: int, asset_id: int):
+        status = orchestrator.get_status(account_id, asset_id, switcher)
+        return jsonify(status)
+
+    @app.post("/trading/config")
+    def trading_config():
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "config parameters required"}), 400
+        switcher.update_config(data)
+        return jsonify(switcher.get_config())
+
+    @app.get("/trading/config")
+    def trading_config_get():
+        return jsonify(switcher.get_config())
+
+    @app.post("/trading/switch")
+    def trading_switch():
+        data = request.get_json()
+        if not data or "algorithm" not in data:
+            return jsonify({"error": "algorithm name required"}), 400
+        name = data["algorithm"]
+        if switcher.switch(name):
+            return jsonify({"active": name})
+        return jsonify({"error": f"unknown algorithm '{name}'", "available": AVAILABLE_ALGORITHMS}), 400
+
+    # ── Backtesting ──
+
+    @app.post("/backtest/run")
+    def backtest_run():
+        data = request.get_json()
+        if not data or "asset_id" not in data:
+            return jsonify({"error": "asset_id is required"}), 400
+        result = run_backtest(
+            asset_id=data["asset_id"],
+            starting_cash=data.get("starting_cash", 100_000),
+            limit=data.get("limit", 90),
+            config=data.get("config"),
+        )
+        return jsonify({
+            "asset_id": result.asset_id,
+            "symbol": result.symbol,
+            "algorithm": result.algorithm,
+            "starting_cash": result.starting_cash,
+            "ending_cash": result.ending_cash,
+            "shares_held": result.shares_held,
+            "total_value": result.total_value,
+            "return_pct": result.return_pct,
+            "total_trades": result.total_trades,
+            "buys": result.buys,
+            "sells": result.sells,
+            "trade_log": result.trade_log,
+        })
+
+    # ── Evaluation ──
+
+    @app.get("/evaluation/compare")
+    def evaluation_compare():
+        asset_id = request.args.get("asset_id", type=int)
+        if not asset_id:
+            return jsonify({"error": "asset_id query parameter required"}), 400
+        limit = request.args.get("limit", 90, type=int)
+        result = compare_algorithms(asset_id=asset_id, limit=limit)
+        return jsonify(result)
 
     return app
 
