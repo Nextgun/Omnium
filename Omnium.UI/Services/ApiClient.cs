@@ -177,6 +177,42 @@ public class ApiClient
         catch { return null; }
     }
 
+    // ── Email Verification ──
+
+    public async Task<AuthResultDto?> SendVerificationAsync(string username, string email)
+    {
+        try
+        {
+            var resp = await _http.PostAsJsonAsync("/auth/send-verification",
+                new { username, email });
+            return await resp.Content.ReadFromJsonAsync<AuthResultDto>(JsonOpts);
+        }
+        catch { return null; }
+    }
+
+    public async Task<AuthResultDto?> VerifyEmailAsync(string username, string code)
+    {
+        try
+        {
+            var resp = await _http.PostAsJsonAsync("/auth/verify-email",
+                new { username, code });
+            return await resp.Content.ReadFromJsonAsync<AuthResultDto>(JsonOpts);
+        }
+        catch { return null; }
+    }
+
+    // ── Assets (paginated) ──
+
+    public async Task<PaginatedAssetsDto?> GetAssetsPaginatedAsync(int page = 1, int perPage = 10)
+    {
+        try
+        {
+            return await _http.GetFromJsonAsync<PaginatedAssetsDto>(
+                $"/assets?page={page}&per_page={perPage}", JsonOpts);
+        }
+        catch { return null; }
+    }
+
     // ── Evaluation ──
 
     public async Task<JsonElement?> CompareAlgorithmsAsync(int assetId, int limit = 90)
@@ -202,3 +238,4 @@ public record TickResultDto(int Asset_Id, string Symbol, string Action, double P
 public record TradingStatusDto(int Account_Id, int Asset_Id, string Symbol, double Current_Price, double Reference_Price, int Shares_Held, double? Avg_Buy_Price, string Signal, string Algorithm);
 public record TradingConfigDto(string Algorithm, double Buy_Threshold, double Sell_Threshold, double Stop_Loss, int Max_Position);
 public record BacktestResultDto(int Asset_Id, string Symbol, string Algorithm, double Starting_Cash, double Ending_Cash, int Shares_Held, double Total_Value, double Return_Pct, int Total_Trades, int Buys, int Sells);
+public record PaginatedAssetsDto(List<AssetDto> Assets, int Page, int Per_Page, int Total, int Total_Pages);

@@ -3,6 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using Omnium.UI.Services;
 
 namespace Omnium.UI;
@@ -14,6 +17,8 @@ public partial class MainWindow : Window
     private string _selectedSymbol = "";
     private const int DefaultAccountId = 1;
     private System.Windows.Threading.DispatcherTimer? _refreshTimer;
+    private int _browsePage = 1;
+    private int _browseTotalPages = 1;
 
     public string LoggedInUser { get; set; } = "";
 
@@ -97,6 +102,8 @@ public partial class MainWindow : Window
         AccountPanel.Visibility = panel == "account" ? Visibility.Visible : Visibility.Collapsed;
         ConfigPanel.Visibility = panel == "config" ? Visibility.Visible : Visibility.Collapsed;
         PortfolioPanel.Visibility = panel == "portfolio" ? Visibility.Visible : Visibility.Collapsed;
+        ChartPanel.Visibility = panel == "chart" ? Visibility.Visible : Visibility.Collapsed;
+        BrowsePanel.Visibility = panel == "browse" ? Visibility.Visible : Visibility.Collapsed;
         AboutPanel.Visibility = panel == "about" ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -388,6 +395,140 @@ public partial class MainWindow : Window
         {
             EvalSummaryText.Text = "[E-303] Evaluation failed — is the API running?";
             EvalSummaryText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
+        }
+    }
+
+    // ── Chart ──
+
+    private async void NavChart_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPanel("chart");
+        if (_selectedAssetId <= 0)
+        {
+            ChartAssetLabel.Text = "No asset selected — search for one first";
+            return;
+        }
+
+        ChartAssetLabel.Text = $"Loading chart for {_selectedSymbol}...";
+        var history = await _api.GetPriceHistoryAsync(_selectedAssetId, 90);
+        if (history.Count == 0)
+        {
+            ChartAssetLabel.Text = "[E-304] No price data available for chart.";
+            return;
+        }
+
+        ChartAssetLabel.Text = $"{_selectedSymbol} — Close Price (last {history.Count} days)";
+
+        // History is newest-first; reverse for chronological plot
+        history.Reverse();
+
+        var model = new PlotModel
+        {
+            Background = OxyColor.FromRgb(0x2F, 0x35, 0x45),
+            PlotAreaBorderColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
+            TextColor = OxyColor.FromRgb(0xC9, 0xD1, 0xE8),
+        };
+
+        var dateAxis = new DateTimeAxis
+        {
+            Position = AxisPosition.Bottom,
+            StringFormat = "MM/dd",
+            AxislineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
+            TicklineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
+            TextColor = OxyColor.FromRgb(0x8F, 0xA1, 0xC7),
+            MajorGridlineStyle = LineStyle.Dot,
+            MajorGridlineColor = OxyColor.FromArgb(40, 255, 255, 255),
+        };
+        model.Axes.Add(dateAxis);
+
+        var valueAxis = new LinearAxis
+        {
+            Position = AxisPosition.Left,
+            StringFormat = "$0.00",
+            AxislineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
+            TicklineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
+            TextColor = OxyColor.FromRgb(0x8F, 0xA1, 0xC7),
+            MajorGridlineStyle = LineStyle.Dot,
+            MajorGridlineColor = OxyColor.FromArgb(40, 255, 255, 255),
+        };
+        model.Axes.Add(valueAxis);
+
+        var series = new LineSeries
+        {
+            Color = OxyColor.FromRgb(0x60, 0xA5, 0xFA),
+            StrokeThickness = 2,
+            MarkerType = MarkerType.Circle,
+            MarkerSize = 3,
+            MarkerFill = OxyColor.FromRgb(0x60, 0xA5, 0xFA),
+        };
+
+        foreach (var p in history)
+        {
+            if (DateTime.TryParse(p.Timestamp, out var dt))
+                series.Points.Add(new DataPoint(DateTimeAxis.ToDouble(dt), p.Close));
+        }
+
+        model.Series.Add(series);
+        PriceChartView.Model = model;
+    }
+
+    // ── Browse ──
+
+    private async void NavBrowse_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPanel("browse");
+        await LoadBrowsePageAsync();
+    }
+
+    private async Task LoadBrowsePageAsync()
+    {
+        BrowsePageInfo.Text = "Loading...";
+        var result = await _api.GetAssetsPaginatedAsync(_browsePage, 10);
+        if (result == null)
+        {
+            BrowsePageInfo.Text = "[E-305] Could not load stocks. Is the API running?";
+            return;
+        }
+
+        _browseTotalPages = result.Total_Pages;
+        BrowseGrid.ItemsSource = result.Assets;
+        BrowsePageInfo.Text = $"Showing page {result.Page} of {result.Total_Pages} ({result.Total} stocks total)";
+        BrowsePageNum.Text = $"Page {result.Page} / {result.Total_Pages}";
+    }
+
+    private async void BrowsePrev_Click(object sender, RoutedEventArgs e)
+    {
+        if (_browsePage > 1)
+        {
+            _browsePage--;
+            await LoadBrowsePageAsync();
+        }
+    }
+
+    private async void BrowseNext_Click(object sender, RoutedEventArgs e)
+    {
+        if (_browsePage < _browseTotalPages)
+        {
+            _browsePage++;
+            await LoadBrowsePageAsync();
+        }
+    }
+
+    private async void BrowseGrid_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (BrowseGrid.SelectedItem is AssetDto asset)
+        {
+            _selectedAssetId = asset.Id;
+            _selectedSymbol = asset.Symbol;
+
+            AssetSymbolText.Text = asset.Symbol;
+            AssetNameText.Text = asset.Name;
+            SidebarStatus.Text = $"Selected: {asset.Symbol}";
+
+            var price = await _api.GetLatestPriceAsync(asset.Id);
+            AssetPriceText.Text = price != null ? $"${price.Close:F2}" : "--";
+
+            ShowPanel("dashboard");
         }
     }
 
