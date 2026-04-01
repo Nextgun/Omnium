@@ -2,7 +2,7 @@
 
 **Team:** QuantumShell (7 people) | **Course:** COSC 3370, TAMUCC
 **Deadline:** April 14, 2026 (~20 days from March 25)
-**Last updated:** 2026-03-25
+**Last updated:** 2026-04-01
 
 ---
 
@@ -48,7 +48,17 @@
 
 ### WPF Desktop App
 - [x] WPF shell layout — sidebar nav, ticker tabs, dashboard panels (`Omnium.UI/`)
-- [ ] WPF HttpClient wiring to Flask API (NOT DONE)
+- [x] WPF HttpClient wiring to Flask API (`Omnium.UI/Services/ApiClient.cs`)
+- [x] Login/Register screen with tab toggle (`LoginWindow.xaml`)
+- [x] Auto-refresh price/signal every 10s (DispatcherTimer)
+- [x] Portfolio overview panel (positions, shares, value, cost basis)
+- [x] Trade confirmation dialog (MessageBox before tick)
+- [x] Backtest results DataGrid (bar/action/price/shares/cash)
+- [x] Evaluation results DataGrid (strategy/return/value/trades)
+- [x] Status bar (last refresh timestamp + version)
+- [x] About/Help panel (team, version, features, architecture)
+- [x] Error codes on all error messages (`docs/error-codes.md`)
+- [x] Exe packaging — `build.bat`, `launch_omnium.bat`, single-file publish (v0.1.0)
 
 ### Auth
 - [x] Registration with username/password validation
@@ -78,10 +88,10 @@
 2. ~~**Test the API end-to-end**~~ DONE (2026-04-01)
    - Flask server starts, /health and /assets/search verified with seeded DB
 
-3. **Connect WPF frontend to API**
-   - WPF shell merged into `integrate-gui` branch (from `11-create-interface-for-switching-between-decision-modules`)
-   - `MainWindow.xaml.cs` needs HttpClient calls to localhost:5000 endpoints
-   - Who: You / WPF developer(s) | Effort: 2-3 sessions
+3. ~~**Connect WPF frontend to API**~~ DONE (2026-04-01)
+   - Full HttpClient wiring in `ApiClient.cs`
+   - Login, dashboard, trade, backtest, evaluate, portfolio, config panels all connected
+   - Exe packaging with `build.bat` + `launch_omnium.bat` (v0.1.0)
 
 4. **Switch to remote MariaDB (bane.tamucc.edu)**
    - Currently everyone uses localhost; need shared data for demo
@@ -190,12 +200,21 @@ Omnium/
 │   └── utils/                # EventBus, Config, logging
 ├── tests/
 ├── devtools/
+├── Omnium.UI/                # WPF Desktop App (.NET 8)
+│   ├── App.xaml              # App entry point
+│   ├── LoginWindow.xaml      # Login/Register screen (DONE)
+│   ├── MainWindow.xaml       # Main app shell (DONE)
+│   └── Services/ApiClient.cs # HttpClient wrapper (DONE)
 ├── docs/
 │   ├── api-guide.md          # How to use the API
+│   ├── error-codes.md        # UI error code reference
 │   └── project-status.md     # This file
 ├── .env.example
+├── build.bat                 # Build exe (dotnet publish)
+├── launch_omnium.bat         # Start MariaDB + Flask + WPF
 ├── requirements.txt
 ├── setup_dev.py
+├── setup_db.py
 ├── sonar-project.properties
 └── CLAUDE.md
 ```

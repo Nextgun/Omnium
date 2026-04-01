@@ -44,17 +44,20 @@ Omnium/
 │   ├── models/__init__.py      # Dataclasses: Asset, Price, Account, Trade + enums
 │   └── utils/__init__.py       # EventBus, Config, setup_logging
 ├── Omnium.UI/                  # WPF Desktop App (C#/.NET 8)
-│   ├── MainWindow.xaml         # Main app shell (sidebar, nav, dashboard panels)
-│   ├── MainWindow.xaml.cs      # Code-behind (needs API wiring)
-│   ├── Dashboard/Panels/       # Reusable dashboard panel components
-│   ├── App.xaml                # WPF app entry point
-│   └── Omnium.UI.sln           # Visual Studio solution file
+│   ├── App.xaml / App.xaml.cs  # App entry point (login → main window)
+│   ├── LoginWindow.xaml(.cs)   # Login/Register screen (DONE)
+│   ├── MainWindow.xaml(.cs)    # Main app shell — all panels (DONE)
+│   ├── Services/ApiClient.cs   # HttpClient wrapper for all API endpoints (DONE)
+│   └── Omnium.UI.csproj        # .NET 8 project with single-file publish config
 ├── tests/
 ├── devtools/                   # PlantUML watcher, conda/vscode setup utils
 ├── docs/
 │   ├── api-guide.md            # Comprehensive API usage guide
+│   ├── error-codes.md          # UI error code reference (E-1xx, E-2xx, E-3xx)
 │   └── project-status.md       # Full project status + what's left
 ├── .env.example                # Template for local DB config
+├── build.bat                   # Build single exe in dist/ folder
+├── launch_omnium.bat           # Start MariaDB + Flask + WPF in one click
 ├── requirements.txt            # flask, mariadb, python-dotenv, yfinance, pytest, ruff
 ├── setup_dev.py                # One-time dev environment setup (conda env + deps)
 ├── setup_db.py                 # One-time DB setup (installs MariaDB + schema + seed)
