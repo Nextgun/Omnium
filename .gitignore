@@ -218,3 +218,6 @@ dist/
 # Build outputs
 bin/
 obj/
+
+# Custom ignore rules can be added below this line
+.claude
