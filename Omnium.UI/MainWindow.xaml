@@ -130,6 +130,7 @@
             <RowDefinition Height="44"/>   <!-- Nav bar -->
             <RowDefinition Height="44"/>   <!-- Search/ticker bar -->
             <RowDefinition Height="*"/>    <!-- Content -->
+            <RowDefinition Height="26"/>   <!-- Status bar -->
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="220"/>
@@ -149,8 +150,9 @@
                     <Button Style="{StaticResource TopNavTabStyle}" Content="ACCOUNT" Click="NavAccount_Click"/>
                 </StackPanel>
 
-                <!-- Connection status -->
+                <!-- User + Connection status -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0">
+                    <TextBlock x:Name="UserNameText" Text="" Foreground="#60A5FA" FontSize="12" Margin="0,0,16,0"/>
                     <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#EF4444" Margin="0,0,6,0"/>
                     <TextBlock x:Name="StatusText" Text="Disconnected" Foreground="#8FA1C7" FontSize="12"/>
                 </StackPanel>
@@ -240,6 +242,8 @@
                     <Button Style="{StaticResource SidebarButtonStyle}" Content="⚖️ Compare Strategies" Click="NavEvaluate_Click"/>
                     <Button Style="{StaticResource SidebarButtonStyle}" Content="💰 Account Details" Click="NavAccount_Click"/>
                     <Button Style="{StaticResource SidebarButtonStyle}" Content="⚙️ Algorithm Config" Click="NavConfig_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📋 Portfolio" Click="NavPortfolio_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="ℹ️ About" Click="NavAbout_Click"/>
                 </StackPanel>
 
                 <!-- Bottom status -->
@@ -428,6 +432,56 @@
                 </StackPanel>
             </Border>
 
+            <!-- PORTFOLIO PANEL -->
+            <Border x:Name="PortfolioPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Portfolio Overview" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="PortfolioSummaryText" Text="" Foreground="#10B981" FontSize="16" Margin="0,0,0,14"/>
+                    <ListBox Grid.Row="2" x:Name="PortfolioList" Background="Transparent"
+                             BorderThickness="0" Foreground="White" FontSize="13">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Symbol}" Foreground="#60A5FA" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Shares}" Foreground="#C9D1E8"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Value}" Foreground="#10B981"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding PnL}" Foreground="#9AA6C1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- ABOUT PANEL -->
+            <Border x:Name="AboutPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="About Omnium" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"
+                               Text="Omnium v0.1.0 — Modular Day-Trading Platform&#x0a;&#x0a;Built by QuantumShell for COSC 3370 at TAMUCC.&#x0a;&#x0a;Features:&#x0a;  • Rule-based trading algorithm (mean reversion)&#x0a;  • Real-time market data from Yahoo Finance&#x0a;  • Paper trading with simulated accounts&#x0a;  • Backtesting engine for strategy validation&#x0a;  • Multi-strategy comparison and evaluation&#x0a;&#x0a;Architecture: WPF Desktop → Flask REST API → MariaDB&#x0a;&#x0a;Team: QuantumShell — TAMUCC COSC 3370"/>
+                </StackPanel>
+            </Border>
+
         </Grid>
+
+        <!-- ═══ ROW 3: STATUS BAR ═══ -->
+        <Border Grid.Row="3" Grid.ColumnSpan="2" Background="#FF161A26" BorderBrush="#1FFFFFFF" BorderThickness="0,1,0,0">
+            <Grid Margin="14,0">
+                <TextBlock x:Name="StatusBarText" Text="Ready" Foreground="#6B7280" FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="Omnium v0.1.0" Foreground="#4B5563" FontSize="11"
+                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

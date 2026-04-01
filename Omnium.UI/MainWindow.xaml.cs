@@ -13,6 +13,9 @@ public partial class MainWindow : Window
     private int _selectedAssetId;
     private string _selectedSymbol = "";
     private const int DefaultAccountId = 1;
+    private System.Windows.Threading.DispatcherTimer? _refreshTimer;
+
+    public string LoggedInUser { get; set; } = "";
 
     public MainWindow()
     {
@@ -37,6 +40,43 @@ public partial class MainWindow : Window
 
         // Load account info
         await RefreshAccountInfoAsync();
+
+        // Show logged-in user
+        if (UserNameText != null && !string.IsNullOrEmpty(LoggedInUser))
+            UserNameText.Text = LoggedInUser;
+
+        // Start auto-refresh timer (10s)
+        _refreshTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(10)
+        };
+        _refreshTimer.Tick += async (_, _) => await AutoRefreshAsync();
+        _refreshTimer.Start();
+    }
+
+    private async Task AutoRefreshAsync()
+    {
+        if (_selectedAssetId <= 0) return;
+
+        var price = await _api.GetLatestPriceAsync(_selectedAssetId);
+        if (price != null)
+            AssetPriceText.Text = $"${price.Close:F2}";
+
+        var status = await _api.GetTradingStatusAsync(DefaultAccountId, _selectedAssetId);
+        if (status != null)
+        {
+            SignalText.Text = status.Signal;
+            SignalText.Foreground = new SolidColorBrush(status.Signal switch
+            {
+                "BUY" => (Color)ColorConverter.ConvertFromString("#10B981"),
+                "SELL" => (Color)ColorConverter.ConvertFromString("#EF4444"),
+                _ => (Color)ColorConverter.ConvertFromString("#8FA1C7")
+            });
+            SharesHeldText.Text = status.Shares_Held.ToString();
+        }
+
+        await RefreshAccountInfoAsync();
+        StatusBarText.Text = $"Last refresh: {DateTime.Now:HH:mm:ss}";
     }
 
     // ── Navigation ──
@@ -49,6 +89,8 @@ public partial class MainWindow : Window
         EvaluatePanel.Visibility = panel == "evaluate" ? Visibility.Visible : Visibility.Collapsed;
         AccountPanel.Visibility = panel == "account" ? Visibility.Visible : Visibility.Collapsed;
         ConfigPanel.Visibility = panel == "config" ? Visibility.Visible : Visibility.Collapsed;
+        PortfolioPanel.Visibility = panel == "portfolio" ? Visibility.Visible : Visibility.Collapsed;
+        AboutPanel.Visibility = panel == "about" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void NavDashboard_Click(object sender, RoutedEventArgs e) => ShowPanel("dashboard");
@@ -61,7 +103,7 @@ public partial class MainWindow : Window
         ShowPanel("trade");
     }
 
-    private async void NavBacktest_Click(object sender, RoutedEventArgs e)
+    private void NavBacktest_Click(object sender, RoutedEventArgs e)
     {
         BacktestAssetLabel.Text = _selectedAssetId > 0
             ? $"Asset: {_selectedSymbol} (ID: {_selectedAssetId})"
@@ -121,6 +163,54 @@ public partial class MainWindow : Window
             ConfigDetailText.Text = "Could not load config. Is the API running?";
         }
     }
+
+    private async void NavPortfolio_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPanel("portfolio");
+        PortfolioSummaryText.Text = "Loading positions...";
+
+        var account = await _api.GetAccountAsync(DefaultAccountId);
+        var trades = await _api.GetTradesAsync(DefaultAccountId);
+
+        if (account == null)
+        {
+            PortfolioSummaryText.Text = "Could not load account.";
+            return;
+        }
+
+        // Calculate positions from trade history
+        var positions = new Dictionary<int, (string Symbol, int Shares, decimal TotalCost)>();
+        foreach (var t in trades)
+        {
+            if (!positions.ContainsKey(t.Asset_Id))
+                positions[t.Asset_Id] = ("Asset " + t.Asset_Id, 0, 0m);
+
+            var p = positions[t.Asset_Id];
+            if (t.Side == "BUY")
+                positions[t.Asset_Id] = (p.Symbol, p.Shares + t.Quantity, p.TotalCost + (decimal)(t.Price * t.Quantity));
+            else
+                positions[t.Asset_Id] = (p.Symbol, p.Shares - t.Quantity, p.TotalCost - (decimal)(t.Price * t.Quantity));
+        }
+
+        var items = new List<PortfolioItem>();
+        foreach (var kvp in positions.Where(p => p.Value.Shares > 0))
+        {
+            var latest = await _api.GetLatestPriceAsync(kvp.Key);
+            var currentValue = latest != null ? (decimal)latest.Close * kvp.Value.Shares : 0m;
+            items.Add(new PortfolioItem
+            {
+                Symbol = kvp.Value.Symbol,
+                Shares = $"{kvp.Value.Shares} shares",
+                Value = $"${currentValue:N2}",
+                PnL = $"Cost: ${kvp.Value.TotalCost:N2}"
+            });
+        }
+
+        PortfolioList.ItemsSource = items;
+        PortfolioSummaryText.Text = $"Cash: ${account.Cash_Balance:N2} | {items.Count} position(s)";
+    }
+
+    private void NavAbout_Click(object sender, RoutedEventArgs e) => ShowPanel("about");
 
     // ── Search ──
 
@@ -193,6 +283,11 @@ public partial class MainWindow : Window
             TradeResultText.Text = "Select an asset first.";
             return;
         }
+
+        var confirm = MessageBox.Show(
+            $"Run trading algorithm on {_selectedSymbol}?\nThis may execute a buy or sell order.",
+            "Confirm Trade", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (confirm != MessageBoxResult.Yes) return;
 
         TradeResultText.Text = "Running algorithm...";
         var result = await _api.TradingTickAsync(DefaultAccountId, _selectedAssetId);
@@ -291,4 +386,12 @@ public partial class MainWindow : Window
         var account = await _api.GetAccountAsync(DefaultAccountId);
         AccountCashText.Text = account != null ? $"${account.Cash_Balance:N2}" : "--";
     }
+}
+
+public class PortfolioItem
+{
+    public string Symbol { get; set; } = "";
+    public string Shares { get; set; } = "";
+    public string Value { get; set; } = "";
+    public string PnL { get; set; } = "";
 }
