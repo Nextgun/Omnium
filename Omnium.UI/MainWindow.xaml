@@ -1,13 +1,9 @@
-﻿<!--
-    MainWindow.xaml
-    Purpose:
-    - Defines the main application shell (global background + layout regions).
-    - Overall layout is layered:
-        Layer 0 = Global top navigation bar (full width; app-level actions)
-        Layer 1 = Global ticker tab bar (full width; instrument/workspace tabs)
-        Layer 2 = Main content region (two columns):
-            Left  = Sidebar navigation (static menu)
-            Right = Panel workspace (modular dashboard panels)
+<!--
+    MainWindow.xaml — Omnium Trading Platform
+    Layout:
+        Row 0 = Top nav bar (OMNIUM title + nav buttons)
+        Row 1 = Ticker tab bar (search box + asset tabs)
+        Row 2 = Main content (sidebar + workspace panels)
 -->
 
 <Window x:Class="Omnium.UI.MainWindow"
@@ -15,18 +11,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Omnium.UI.Dashboard.Panels"
         mc:Ignorable="d"
-        Title="Omnium"
+        Title="Omnium — Trading Platform"
         Height="900"
         Width="1600">
 
-    <!-- ==========================================================
-         WINDOW BACKGROUND
-         Purpose:
-         - Defines the global application surface (dark gradient).
-         - Intended to unify the visual tone across sidebar + workspace.
-         ========================================================== -->
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FF202020" Offset="1"/>
@@ -34,24 +23,9 @@
         </LinearGradientBrush>
     </Window.Background>
 
-    <!-- ==========================================================
-         WINDOW RESOURCES
-         Purpose:
-         - Centralizes reusable styles so layout XAML stays clean.
-         - Applied via StaticResource to keep styling consistent.
-         ========================================================== -->
     <Window.Resources>
-
-        <!-- ======================================================
-             SIDEBAR BUTTON STYLE
-             Purpose:
-             - Standard sidebar menu button styling (card-like).
-             - Provides hover + pressed feedback for usability.
-             Notes:
-             - Uses a custom ControlTemplate so CornerRadius is supported.
-             ====================================================== -->
+        <!-- Sidebar button style -->
         <Style x:Key="SidebarButtonStyle" TargetType="Button">
-            <!-- Basic sizing + text layout -->
             <Setter Property="Height" Value="38"/>
             <Setter Property="Margin" Value="0,4"/>
             <Setter Property="Foreground" Value="#E6EAF2"/>
@@ -59,81 +33,18 @@
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="Cursor" Value="Hand"/>
-
-            <!-- Custom template (rounded button + hover states) -->
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Border"
-                                Background="#FF2F3545"
-                                BorderBrush="#FF3C445A"
-                                BorderThickness="1"
-                                CornerRadius="8">
-
-                            <!-- Hosts the button content (text) -->
-                            <ContentPresenter
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="Center"
-                                Margin="{TemplateBinding Padding}"/>
+                        <Border x:Name="Border" Background="#FF2F3545" BorderBrush="#FF3C445A"
+                                BorderThickness="1" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                         </Border>
-
-                        <!-- Interaction feedback -->
                         <ControlTemplate.Triggers>
-
-                            <!-- Hover: slightly brighter surface -->
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Border" Property="Background" Value="#FF384058"/>
                             </Trigger>
-
-                            <!-- Pressed: slightly darker surface -->
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#FF242B3C"/>
-                            </Trigger>
-
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- ======================================================
-             SIDEBAR HEADER BUTTON STYLE
-             Purpose:
-             - Compact version of SidebarButtonStyle used in the ticker tab bar's
-               left "sidebar header" area.
-             - Designed for Top_1 (3/4 width) and Top_2 (1/4 width).
-             Notes:
-             - Intentionally smaller height/font to fit the thin ticker bar row.
-             ====================================================== -->
-        <Style x:Key="SidebarHeaderButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="28"/>
-            <Setter Property="Foreground" Value="#E6EAF2"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Border"
-                                Background="#FF2F3545"
-                                BorderBrush="#FF3C445A"
-                                BorderThickness="1"
-                                CornerRadius="6">
-
-                            <ContentPresenter
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="Center"/>
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-                            <!-- Hover: slightly brighter surface -->
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#FF384058"/>
-                            </Trigger>
-
-                            <!-- Pressed: slightly darker surface -->
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Border" Property="Background" Value="#FF242B3C"/>
                             </Trigger>
@@ -143,411 +54,380 @@
             </Setter>
         </Style>
 
-        <!-- ======================================================
-             TOP NAV TAB STYLE
-             Purpose:
-             - App-level navigation buttons (Trade / Account / Orders / etc.).
-             - Full-height rectangular hover highlight (no rounded edges).
-             Notes:
-             - Implemented via custom ControlTemplate to control hover surface.
-             - Spacing is applied via Margin so hover does not "fill the gaps".
-             ====================================================== -->
+        <!-- Top nav tab style -->
         <Style x:Key="TopNavTabStyle" TargetType="Button">
-            <!-- Make each button fill the nav bar height -->
             <Setter Property="VerticalAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-
-            <!-- Keep spacing between buttons WITHOUT making hover fill the gaps -->
-            <Setter Property="Margin" Value="0"/>
-
-            <!-- Make the tab area larger (bigger hit target) -->
             <Setter Property="MinWidth" Value="88"/>
             <Setter Property="Padding" Value="18,0"/>
-
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="#C9D1E8"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
-
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-
-                        <!-- Root grid fills the entire button area -->
                         <Grid>
-
-                            <!-- Full-width highlight background (goes "wall to wall" up to dividers) -->
-                            <Border x:Name="Bg"
-                                    Background="Transparent"
-                                    VerticalAlignment="Stretch"
-                                    HorizontalAlignment="Stretch"/>
-
-                            <!-- Button text -->
-                            <ContentPresenter x:Name="Content"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Center"/>
-
-                            <!-- Single divider: RIGHT side only (creates one line between buttons) -->
-                            <Border x:Name="RightDivider"
-                                    Width="1"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Stretch"
-                                    Background="#22FFFFFF"/>
+                            <Border x:Name="Bg" Background="Transparent"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border Width="1" HorizontalAlignment="Right" Background="#22FFFFFF"/>
                         </Grid>
-
                         <ControlTemplate.Triggers>
-
-                            <!-- Hover: highlight the entire button area -->
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bg" Property="Background" Value="#22FFFFFF"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
-
-                            <!-- Pressed: slightly stronger highlight -->
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bg" Property="Background" Value="#33FFFFFF"/>
                             </Trigger>
-
-                            <!-- Disabled -->
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.5"/>
-                            </Trigger>
-
                         </ControlTemplate.Triggers>
-
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
-        <!-- ======================================================
-     TOP NAV TAB STYLE (WITH LEFT DIVIDER)
-     Purpose:
-     - Same as TopNavTabStyle but adds a LEFT divider.
-     - Used for the first button in a group (TRADE, Account).
-     ====================================================== -->
-        <Style x:Key="TopNavTabStyleWithLeftDivider"
-       TargetType="Button"
-       BasedOn="{StaticResource TopNavTabStyle}">
+        <!-- Panel card style -->
+        <Style x:Key="PanelCard" TargetType="Border">
+            <Setter Property="Background" Value="#FF2F3545"/>
+            <Setter Property="BorderBrush" Value="#FF3C445A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
 
+        <!-- Action button style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-
-                        <Grid>
-
-                            <!-- Left divider -->
-                            <Border Width="1"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Stretch"
-                            Background="#22FFFFFF"/>
-
-                            <!-- Full-width highlight -->
-                            <Border x:Name="Bg"
-                            Background="Transparent"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Stretch"/>
-
-                            <!-- Button text -->
-                            <ContentPresenter
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
-
-                            <!-- Right divider -->
-                            <Border Width="1"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Stretch"
-                            Background="#22FFFFFF"/>
-                        </Grid>
-
+                        <Border x:Name="Border" Background="#1E3A8A" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                         <ControlTemplate.Triggers>
-
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg"
-                                Property="Background"
-                                Value="#22FFFFFF"/>
-                                <Setter Property="Foreground"
-                                Value="#FFFFFF"/>
+                                <Setter TargetName="Border" Property="Background" Value="#2563EB"/>
                             </Trigger>
-
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bg"
-                                Property="Background"
-                                Value="#33FFFFFF"/>
+                                <Setter TargetName="Border" Property="Background" Value="#1D4ED8"/>
                             </Trigger>
-
                         </ControlTemplate.Triggers>
-
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
     </Window.Resources>
 
-    <!-- ==========================================================
-         ROOT LAYOUT GRID
-         Purpose:
-         - Defines global layout layers:
-             Row 0 = Global top navigation bar (full width)
-             Row 1 = Global ticker tab bar (full width)
-             Row 2 = Main content region (Sidebar + Panel workspace)
-         ========================================================== -->
     <Grid>
         <Grid.RowDefinitions>
-            <!-- Layer 0: Global navigation bar -->
-            <RowDefinition Height="44"/>
-
-            <!-- Layer 1: Global ticker tab bar -->
-            <RowDefinition Height="36"/>
-
-            <!-- Layer 2: Main content region -->
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="44"/>   <!-- Nav bar -->
+            <RowDefinition Height="44"/>   <!-- Search/ticker bar -->
+            <RowDefinition Height="*"/>    <!-- Content -->
         </Grid.RowDefinitions>
-
         <Grid.ColumnDefinitions>
-            <!-- Left: Sidebar region -->
-            <ColumnDefinition Width="260"/>
-
-            <!-- Right: Panel workspace region -->
+            <ColumnDefinition Width="220"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ======================================================
-             LAYER 0: GLOBAL TOP NAVIGATION BAR
-             Purpose:
-             - Always visible application navigation (app-level actions).
-             - OMNIUM title is pinned to top-left of the window.
-             Notes:
-             - Nav button groups begin after sidebar width so they align with the
-               panel workspace column.
-             ====================================================== -->
-        <Border Grid.Row="0"
-                Grid.ColumnSpan="2"
-                BorderBrush="#2FFFFFFF"
-                BorderThickness="0,0,0,1"
-                Margin="0,0,0,6">
+        <!-- ═══ ROW 0: TOP NAV BAR ═══ -->
+        <Border Grid.Row="0" Grid.ColumnSpan="2" BorderBrush="#2FFFFFFF" BorderThickness="0,0,0,1">
             <Grid>
+                <TextBlock Text="OMNIUM" Margin="18,0,0,0" VerticalAlignment="Center"
+                           Foreground="#E6EAF2" FontSize="16" FontWeight="SemiBold"/>
 
-                <!-- App title stays pinned to window's top-left -->
-                <TextBlock Text="OMNIUM"
-                       Margin="18,0,0,0"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Left"
-                       Foreground="#E6EAF2"
-                       FontSize="16"
-                       FontWeight="SemiBold"/>
-
-                <!-- Nav content begins after sidebar width -->
-                <Grid Margin="260,0,0,0">
-                    <Grid.ColumnDefinitions>
-                        <!-- Left-side nav buttons -->
-                        <ColumnDefinition Width="Auto"/>
-
-                        <!-- Spacer pushes right group to the edge -->
-                        <ColumnDefinition Width="*"/>
-
-                        <!-- Right group: Account/Orders/P&L -->
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- LEFT GROUP: TRADE + placeholders -->
-                    <StackPanel Grid.Column="0"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Left">
-                        <Button Style="{StaticResource TopNavTabStyleWithLeftDivider}" Content="TRADE"/>
-                        <Button Style="{StaticResource TopNavTabStyle}" Content="button_11"/>
-                        <Button Style="{StaticResource TopNavTabStyle}" Content="button_12"/>
-                        <Button Style="{StaticResource TopNavTabStyle}" Content="button_13"/>
-                        <Button Style="{StaticResource TopNavTabStyle}" Content="button_14"/>
-                        <Button Style="{StaticResource TopNavTabStyle}" Content="button_15"/>
-                    </StackPanel>
-
-                    <!-- RIGHT GROUP: Account, Orders, P/L -->
-                    <StackPanel Grid.Column="2"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Right"
-                            Margin="0,0,16,0">
-                        <Button Style="{StaticResource TopNavTabStyleWithLeftDivider}" Content="Account"/>
-                        <Button Style="{StaticResource TopNavTabStyle}" Content="Orders"/>
-
-                        <!-- P/L CELL (display-only for now; will later bind to computed P/L) -->
-                        <Border Background="Transparent"
-                                VerticalAlignment="Stretch"
-                                Padding="18,0"
-                                MinWidth="150">
-
-                            <TextBlock VerticalAlignment="Center"
-                                       HorizontalAlignment="Center"
-                                       Foreground="#8FA1C7"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Text="P/L: +$1,245.22"/>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-
-            </Grid>
-        </Border>
-
-        <!-- ======================================================
-             LAYER 1: GLOBAL TICKER TAB BAR
-             Purpose:
-             - Displays open instrument/workspace tabs (AAPL, TSLA, etc.).
-             - Leftmost 260px acts as a "sidebar header" area with quick actions.
-             Notes:
-             - Currently static (UI only).
-             - Will later become dynamic (TabControl bound to workspaces).
-             ====================================================== -->
-        <Grid Grid.Row="1" Grid.ColumnSpan="2" Background="Transparent">
-            <Grid.ColumnDefinitions>
-                <!-- Sidebar header area -->
-                <ColumnDefinition Width="260"/>
-
-                <!-- Ticker tabs area -->
-                <ColumnDefinition Width="*"/>
-
-                <!-- Right-side static controls -->
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- ==================================================
-                 SIDEBAR HEADER ACTIONS (Top_1 / Top_2)
-                 Purpose:
-                 - Quick actions aligned directly above the sidebar column.
-                 - Top_1 = 3/4 width; Top_2 = 1/4 width (reference-inspired).
-                 ================================================== -->
-            <Grid Grid.Column="0" Margin="14,4,14,4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0"
-                        Style="{StaticResource SidebarHeaderButtonStyle}"
-                        Content="Top_1"
-                        Margin="0,0,8,0"/>
-
-                <Button Grid.Column="1"
-                        Style="{StaticResource SidebarHeaderButtonStyle}"
-                        Content="Top_2"/>
-            </Grid>
-
-            <!-- ==================================================
-                 TICKER TABS (start after sidebar width)
-                 Notes:
-                 - Tabs are placeholders; active/inactive visuals will later be
-                   formalized as a styled TabControl.
-                 ================================================== -->
-            <StackPanel Grid.Column="1"
-                        Orientation="Horizontal"
-                        VerticalAlignment="Stretch">
-
-                <!-- ACTIVE TAB (example) -->
-                <Border Background="#1E3A8A"
-                        Padding="20,0"
-                        VerticalAlignment="Stretch">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="AAPL" Foreground="White" FontWeight="SemiBold"/>
-                        <TextBlock Text="  ×" Foreground="White" Margin="10,0,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- INACTIVE TAB (example) -->
-                <Border Background="Transparent"
-                        Padding="20,0"
-                        VerticalAlignment="Stretch">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="TSLA" Foreground="#CCCCCC"/>
-                        <TextBlock Text="  ×" Foreground="#888888" Margin="10,0,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- ADD NEW TICKER BUTTON (placeholder) -->
-                <Border Background="Transparent"
-                        Padding="20,0"
-                        VerticalAlignment="Stretch">
-                    <TextBlock Text="+"
-                               FontSize="16"
-                               Foreground="#CCCCCC"
-                               VerticalAlignment="Center"/>
-                </Border>
-            </StackPanel>
-
-            <!-- Right cluster: placeholder static controls -->
-            <StackPanel Grid.Column="2"
-                        Orientation="Horizontal"
-                        VerticalAlignment="Stretch"
-                        Margin="0,0,16,0">
-                <TextBlock Text="Layout"
-                           Foreground="#AAAAAA"
-                           VerticalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
-
-        <!-- ======================================================
-             LAYER 2: LEFT SIDEBAR (below nav/tab bars)
-             Purpose:
-             - Static app navigation/actions.
-             Notes:
-             - OMNIUM title was moved to Layer 0 to reduce redundancy.
-             ====================================================== -->
-        <Border Grid.Row="2"
-                Grid.Column="0"
-                BorderThickness="0,0,1,0"
-                Background="Transparent">
-
-            <Grid>
-                <Grid.RowDefinitions>
-                    <!-- Sidebar main area -->
-                    <RowDefinition Height="*"/>
-
-                    <!-- Bottom status -->
-                    <RowDefinition Height="72"/>
-                </Grid.RowDefinitions>
-
-                <!-- Sidebar Menu Buttons (placeholders for now) -->
-                <StackPanel Grid.Row="0" Margin="14,14">
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_1"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_2"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_3"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_4"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_5"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_6"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_7"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_8"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_9"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="button_10"/>
+                <StackPanel Orientation="Horizontal" Margin="220,0,0,0" VerticalAlignment="Stretch">
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="DASHBOARD" Click="NavDashboard_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="TRADE" Click="NavTrade_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="BACKTEST" Click="NavBacktest_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="ACCOUNT" Click="NavAccount_Click"/>
                 </StackPanel>
 
-                <!-- Sidebar Status -->
-                <TextBlock Grid.Row="1"
-                           Text="Connected"
-                           Margin="18,0,0,0"
-                           VerticalAlignment="Center"
-                           Foreground="#9AA6C1"
-                           FontSize="12"/>
+                <!-- Connection status -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0">
+                    <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#EF4444" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="StatusText" Text="Disconnected" Foreground="#8FA1C7" FontSize="12"/>
+                </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ======================================================
-             LAYER 2: PANEL WORKSPACE AREA (below nav/tab bars)
-             Purpose:
-             - Primary workspace for modular draggable panels.
-             Notes:
-             - Margin adds breathing room from window edges and bar rows.
-             - Panels will later be hosted in a draggable/grid-snapping surface.
-             ====================================================== -->
+        <!-- ═══ ROW 1: SEARCH BAR ═══ -->
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#FF1A1F2E" BorderBrush="#1FFFFFFF" BorderThickness="0,0,0,1">
+            <Grid Margin="18,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search box -->
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SearchBox" Grid.Column="0" Height="30"
+                             Background="#FF2F3545" Foreground="White" BorderBrush="#FF3C445A"
+                             Padding="10,4" FontSize="13" VerticalContentAlignment="Center"
+                             KeyDown="SearchBox_KeyDown">
+                        <TextBox.Resources>
+                            <Style TargetType="Border"><Setter Property="CornerRadius" Value="6,0,0,6"/></Style>
+                        </TextBox.Resources>
+                    </TextBox>
+                    <Button Grid.Column="1" Content="Search" Height="30" Padding="14,0"
+                            Style="{StaticResource ActionButton}" Click="SearchButton_Click"/>
+                </Grid>
+
+                <!-- Account info -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="Account:" Foreground="#8FA1C7" FontSize="13" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="AccountCashText" Text="--" Foreground="#10B981" FontSize="13" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══ ROW 2: SIDEBAR ═══ -->
+        <Border Grid.Row="2" Grid.Column="0" BorderThickness="0,0,1,0" BorderBrush="#1FFFFFFF">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- Search results -->
+                    <RowDefinition Height="*"/>     <!-- Watchlist -->
+                    <RowDefinition Height="Auto"/>  <!-- Status -->
+                </Grid.RowDefinitions>
+
+                <!-- Search results list -->
+                <StackPanel Grid.Row="0" Margin="10,10,10,0">
+                    <TextBlock Text="SEARCH RESULTS" Foreground="#8FA1C7" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
+                    <ListBox x:Name="SearchResultsList" MaxHeight="200"
+                             Background="Transparent" BorderThickness="0" Foreground="White"
+                             SelectionChanged="SearchResultsList_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="4,2">
+                                    <TextBlock Text="{Binding Symbol}" Foreground="#60A5FA" FontWeight="SemiBold" Width="60"/>
+                                    <TextBlock Text="{Binding Name}" Foreground="#C9D1E8"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Padding" Value="4,2"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF384058"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#1E3A8A"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </StackPanel>
+
+                <!-- Sidebar actions -->
+                <StackPanel Grid.Row="1" Margin="10,14">
+                    <TextBlock Text="ACTIONS" Foreground="#8FA1C7" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📊 Dashboard" Click="NavDashboard_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📈 Trade Selected" Click="NavTrade_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="🔄 Run Backtest" Click="NavBacktest_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="⚖️ Compare Strategies" Click="NavEvaluate_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="💰 Account Details" Click="NavAccount_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="⚙️ Algorithm Config" Click="NavConfig_Click"/>
+                </StackPanel>
+
+                <!-- Bottom status -->
+                <TextBlock Grid.Row="2" x:Name="SidebarStatus" Text="Ready"
+                           Margin="14,0,0,14" Foreground="#9AA6C1" FontSize="11"/>
+            </Grid>
+        </Border>
+
+        <!-- ═══ ROW 2: MAIN WORKSPACE ═══ -->
         <Grid Grid.Row="2" Grid.Column="1" Margin="16,14,16,16">
-            <local:DashboardPanelView
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"/>
+
+            <!-- All panels stacked; visibility toggled by code-behind -->
+
+            <!-- DASHBOARD PANEL -->
+            <Grid x:Name="DashboardPanel" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Dashboard" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Asset info card -->
+                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PanelCard}" Margin="0,0,8,8">
+                        <StackPanel>
+                            <TextBlock Text="Selected Asset" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="AssetSymbolText" Text="--" Foreground="White" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock x:Name="AssetNameText" Text="Search for a stock to begin" Foreground="#9AA6C1" FontSize="13"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <TextBlock Text="Price: " Foreground="#8FA1C7" FontSize="15"/>
+                                <TextBlock x:Name="AssetPriceText" Text="--" Foreground="#10B981" FontSize="15" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Trading signal card -->
+                    <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource PanelCard}" Margin="8,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Trading Signal" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="SignalText" Text="--" Foreground="White" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock x:Name="SignalAlgoText" Text="No algorithm active" Foreground="#9AA6C1" FontSize="13"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <TextBlock Text="Shares held: " Foreground="#8FA1C7" FontSize="15"/>
+                                <TextBlock x:Name="SharesHeldText" Text="0" Foreground="White" FontSize="15"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Price history card -->
+                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource PanelCard}" Margin="0,8,8,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Recent Prices" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <ListBox Grid.Row="1" x:Name="PriceHistoryList" Background="Transparent"
+                                     BorderThickness="0" Foreground="White" FontSize="12">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="70"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Foreground="#9AA6C1"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Open, StringFormat='{}{0:F2}'}" Foreground="#C9D1E8"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding High, StringFormat='{}{0:F2}'}" Foreground="#10B981"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Low, StringFormat='{}{0:F2}'}" Foreground="#EF4444"/>
+                                            <TextBlock Grid.Column="4" Text="{Binding Close, StringFormat='{}{0:F2}'}" Foreground="White" FontWeight="SemiBold"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Trade history card -->
+                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource PanelCard}" Margin="8,8,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Recent Trades" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <ListBox Grid.Row="1" x:Name="TradeHistoryList" Background="Transparent"
+                                     BorderThickness="0" Foreground="White" FontSize="12">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" FontWeight="SemiBold"
+                                                       Text="{Binding Side}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Side}" Value="BUY">
+                                                                <Setter Property="Foreground" Value="#10B981"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Side}" Value="SELL">
+                                                                <Setter Property="Foreground" Value="#EF4444"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="1" Text="{Binding Quantity}" Foreground="#C9D1E8"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding Price, StringFormat='${0:F2}'}" Foreground="White"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Timestamp}" Foreground="#9AA6C1" FontSize="11"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- TRADE PANEL -->
+            <Border x:Name="TradePanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Execute Trade" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="TradeAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <Button Content="Run Algorithm Tick" Style="{StaticResource ActionButton}"
+                            Width="200" HorizontalAlignment="Left" Click="RunTick_Click"/>
+                    <TextBlock x:Name="TradeResultText" Text="" Foreground="#10B981" FontSize="14"
+                               Margin="0,14,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- BACKTEST PANEL -->
+            <Border x:Name="BacktestPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Backtest" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="BacktestAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <Button Content="Run Backtest (90 days)" Style="{StaticResource ActionButton}"
+                            Width="220" HorizontalAlignment="Left" Click="RunBacktest_Click"/>
+                    <TextBlock x:Name="BacktestResultText" Text="" Foreground="#C9D1E8" FontSize="13"
+                               Margin="0,14,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- EVALUATE PANEL -->
+            <Border x:Name="EvaluatePanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Strategy Comparison" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="EvalAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <Button Content="Compare Strategies" Style="{StaticResource ActionButton}"
+                            Width="200" HorizontalAlignment="Left" Click="RunEvaluate_Click"/>
+                    <TextBlock x:Name="EvalResultText" Text="" Foreground="#C9D1E8" FontSize="13"
+                               Margin="0,14,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ACCOUNT PANEL -->
+            <Border x:Name="AccountPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Account Details" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="AccountDetailText" Text="Loading..." Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- CONFIG PANEL -->
+            <Border x:Name="ConfigPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Algorithm Configuration" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="ConfigDetailText" Text="Loading..." Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
         </Grid>
-
     </Grid>
-
 </Window>
