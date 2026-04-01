@@ -199,6 +199,39 @@ def get_asset_by_id(asset_id: int) -> dict | None:
         conn.close()
 
 
+def get_assets_paginated(page: int = 1, per_page: int = 10) -> dict:
+    """
+    returns a paginated list of all assets.
+    result: {"assets": [...], "page", "per_page", "total", "total_pages"}
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT COUNT(*) FROM assets")
+        total = cursor.fetchone()[0]
+
+        offset = (page - 1) * per_page
+        cursor.execute(
+            "SELECT id, symbol, name FROM assets ORDER BY symbol LIMIT ? OFFSET ?",
+            (per_page, offset)
+        )
+        assets = [_row_to_dict(cursor, row) for row in cursor.fetchall()]
+
+        total_pages = (total + per_page - 1) // per_page
+        return {
+            "assets": assets,
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "total_pages": total_pages,
+        }
+    except Exception as e:
+        print(f"[db] get_assets_paginated error: {e}")
+        return {"assets": [], "page": page, "per_page": per_page, "total": 0, "total_pages": 0}
+    finally:
+        conn.close()
+
+
 # prices =================================================================
 
 def get_latest_price(asset_id: int) -> dict | None:

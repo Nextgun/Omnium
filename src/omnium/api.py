@@ -13,6 +13,7 @@ from flask import Flask, jsonify, request
 
 from src.omnium.data import db
 from src.omnium.authentication.auth_system import RegistrationSystem
+from src.omnium.authentication.email_service import send_verification_email, verify_code
 from src.omnium.algorithms.switcher import AlgorithmSwitcher, AVAILABLE_ALGORITHMS
 from src.omnium.orchestration import orchestrator
 from src.omnium.backtesting.backtest import run_backtest
@@ -105,6 +106,36 @@ def create_app() -> Flask:
         success, message = auth.login(data["username"], data["password"])
         status = 200 if success else 401
         return jsonify({"success": success, "message": message}), status
+
+    # ── Email Verification ──
+
+    @app.post("/auth/send-verification")
+    def auth_send_verification():
+        data = request.get_json()
+        if not data or "username" not in data or "email" not in data:
+            return jsonify({"error": "username and email are required"}), 400
+        success, message = send_verification_email(data["username"], data["email"])
+        status = 200 if success else 500
+        return jsonify({"success": success, "message": message}), status
+
+    @app.post("/auth/verify-email")
+    def auth_verify_email():
+        data = request.get_json()
+        if not data or "username" not in data or "code" not in data:
+            return jsonify({"error": "username and code are required"}), 400
+        success, message = verify_code(data["username"], data["code"])
+        status = 200 if success else 400
+        return jsonify({"success": success, "message": message}), status
+
+    # ── Assets (paginated) ──
+
+    @app.get("/assets")
+    def assets_all():
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 10, type=int)
+        per_page = min(per_page, 50)  # cap
+        result = db.get_assets_paginated(page, per_page)
+        return jsonify(result)
 
     # ── Trading ──
 
