@@ -43,6 +43,12 @@ Omnium/
 │   ├── trading/                # Paper trading (handled by orchestrator for now)
 │   ├── models/__init__.py      # Dataclasses: Asset, Price, Account, Trade + enums
 │   └── utils/__init__.py       # EventBus, Config, setup_logging
+├── Omnium.UI/                  # WPF Desktop App (C#/.NET 8)
+│   ├── MainWindow.xaml         # Main app shell (sidebar, nav, dashboard panels)
+│   ├── MainWindow.xaml.cs      # Code-behind (needs API wiring)
+│   ├── Dashboard/Panels/       # Reusable dashboard panel components
+│   ├── App.xaml                # WPF app entry point
+│   └── Omnium.UI.sln           # Visual Studio solution file
 ├── tests/
 ├── devtools/                   # PlantUML watcher, conda/vscode setup utils
 ├── docs/
@@ -50,7 +56,8 @@ Omnium/
 │   └── project-status.md       # Full project status + what's left
 ├── .env.example                # Template for local DB config
 ├── requirements.txt            # flask, mariadb, python-dotenv, yfinance, pytest, ruff
-├── setup_dev.py                # One-time dev environment setup
+├── setup_dev.py                # One-time dev environment setup (conda env + deps)
+├── setup_db.py                 # One-time DB setup (installs MariaDB + schema + seed)
 └── sonar-project.properties    # SonarQube config (bane.tamucc.edu:9000)
 ```
 
@@ -87,7 +94,9 @@ All endpoints (see docs/api-guide.md for full details):
 ## Important Notes
 
 - DB credentials are in .env (never commit .env, use .env.example as template)
-- The WPF UI is on branch 11-create-interface-for-switching-between-decision-modules
+- The WPF UI is merged into integrate-gui branch; code-behind needs HttpClient wiring to API
+- Setup: `python setup_dev.py` (conda env) → `python setup_db.py --seed` (DB) → `python -m flask --app src.omnium.api run` (API)
+- MariaDB service may need admin start: `net start MariaDB` in admin PowerShell
 - Don't break existing db.py functions — other modules depend on them
 - All API responses should be JSON with appropriate HTTP status codes
 - CS trading algorithm and orchestrator are integrated; ML algorithm is a future addition

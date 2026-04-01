@@ -16,6 +16,8 @@
 - [x] `.env` config for DB credentials (no more hardcoded passwords)
 - [x] `.env.example` with setup instructions for new devs
 - [x] requirements.txt updated for actual stack (flask, mariadb, python-dotenv)
+- [x] `setup_dev.py` — detects Anaconda/Miniconda, creates conda env, installs deps
+- [x] `setup_db.py` — installs MariaDB via winget, creates DB, runs schema, seeds data
 
 ### API (Flask)
 - [x] `src/omnium/api.py` — app factory with all core routes
@@ -29,7 +31,24 @@
 - [x] `GET /account/<id>/position/<asset_id>` — net shares held
 - [x] `POST /auth/register` — user registration
 - [x] `POST /auth/login` — user login
+- [x] `POST /trading/tick` — run one algorithm cycle
+- [x] `GET /trading/status/<account_id>/<asset_id>` — current position + signal
+- [x] `POST /trading/config` / `GET /trading/config` — algorithm parameters
+- [x] `POST /trading/switch` — switch active algorithm
+- [x] `POST /backtest/run` — replay historical data
+- [x] `GET /evaluation/compare?asset_id=X` — compare strategy configs
 - [x] API documentation (`docs/api-guide.md`)
+
+### Trading & Analysis
+- [x] CS mean-reversion algorithm (`src/omnium/algorithms/cs_algorithm.py`)
+- [x] Algorithm switcher (`src/omnium/algorithms/switcher.py`)
+- [x] Orchestrator — connects algorithm to DB, executes trades (`src/omnium/orchestration/orchestrator.py`)
+- [x] Backtesting engine (`src/omnium/backtesting/backtest.py`)
+- [x] Evaluation / comparison module (`src/omnium/evaluation/compare.py`)
+
+### WPF Desktop App
+- [x] WPF shell layout — sidebar nav, ticker tabs, dashboard panels (`Omnium.UI/`)
+- [ ] WPF HttpClient wiring to Flask API (NOT DONE)
 
 ### Auth
 - [x] Registration with username/password validation
@@ -56,14 +75,13 @@
    - Orchestrator in `src/omnium/orchestration/orchestrator.py`
    - All trading endpoints wired into `api.py`
 
-2. **Test the API end-to-end**
-   - Start Flask server, hit every endpoint, verify DB connection
-   - Who: You | Effort: 1 session
+2. ~~**Test the API end-to-end**~~ DONE (2026-04-01)
+   - Flask server starts, /health and /assets/search verified with seeded DB
 
 3. **Connect WPF frontend to API**
-   - WPF app is on branch `11-create-interface-for-switching-between-decision-modules`
-   - Needs to call Flask API endpoints via HttpClient
-   - Who: WPF developer(s) | Effort: 2-3 sessions
+   - WPF shell merged into `integrate-gui` branch (from `11-create-interface-for-switching-between-decision-modules`)
+   - `MainWindow.xaml.cs` needs HttpClient calls to localhost:5000 endpoints
+   - Who: You / WPF developer(s) | Effort: 2-3 sessions
 
 4. **Switch to remote MariaDB (bane.tamucc.edu)**
    - Currently everyone uses localhost; need shared data for demo
@@ -98,10 +116,9 @@
     - Gmail SMTP creds need to go in `.env`
     - Who: Brady | Effort: 1 session
 
-11. **Automate dev setup**
-    - `setup_db.py` — create database, run schema, seed data in one command
-    - Update `setup_dev.py` to ask local vs remote DB
-    - Who: You | Effort: 1 session
+11. ~~**Automate dev setup**~~ DONE (2026-04-01)
+    - `setup_db.py` — installs MariaDB, creates DB, runs schema, seeds data
+    - `setup_dev.py` — detects Anaconda/Miniconda, creates conda env
 
 12. **Fix SonarQube CI**
     - Failing after 10s on PRs; likely config mismatch after restructure
@@ -119,7 +136,8 @@ These remote branches may have work that needs to be pulled in:
 
 | Branch | Description | Status |
 |--------|-------------|--------|
-| `11-create-interface-for-switching-between-decision-modules` | WPF UI + algorithm switching | Needs review |
+| `11-create-interface-for-switching-between-decision-modules` | WPF UI + algorithm switching | Merged into integrate-gui |
+| `9-implement-rule-based-trading-algorithm-cs-module` | CS trading algorithm | Integrated into finish-backend |
 | `13-implement-logging-of-trades-and-portfolio-tracking` | Trade logging | Needs review |
 | `14-design-account-interface-for-future-live-trading-integration` | Account interface | Already merged into database |
 | `23-sonarqube` | SonarQube setup | Already merged into database |
