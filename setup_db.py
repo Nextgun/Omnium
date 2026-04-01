@@ -41,9 +41,22 @@ def get_config() -> dict:
 
 def _is_mariadb_running(config: dict) -> bool:
     """Try to connect to MariaDB. Returns True if reachable."""
+    import mariadb
+
+    # Try with .env password
     try:
-        import mariadb
         conn = mariadb.connect(**config)
+        conn.close()
+        return True
+    except Exception:
+        pass
+
+    # Try with empty password (fresh install)
+    try:
+        conn = mariadb.connect(
+            host=config["host"], port=config["port"],
+            user=config["user"], password="",
+        )
         conn.close()
         return True
     except Exception:
@@ -132,6 +145,7 @@ def install_mariadb(config: dict) -> None:
     """Install MariaDB using winget (Windows) if not already installed."""
     if _is_mariadb_running(config):
         print("[setup_db] MariaDB is already running.")
+        _set_root_password(config)
         return
 
     # Check if service exists and just needs starting
@@ -311,8 +325,11 @@ def seed_data() -> None:
     """Run the stock seeder to populate assets and prices."""
     print("[setup_db] Seeding DJIA stock data (this may take a minute)...")
     try:
-        from src.omnium.data.seed import main as seed_main
-        seed_main()
+        from src.omnium.data import seed
+        seed.reset_all()
+        seed.seed_assets_and_prices()
+        account_ids = seed.seed_accounts()
+        seed.seed_trades(account_ids)
         print("[setup_db] Seed complete.")
     except Exception as e:
         print(f"[setup_db] Seed failed: {e}")
