@@ -59,6 +59,10 @@
 - [x] About/Help panel (team, version, features, architecture)
 - [x] Error codes on all error messages (`docs/error-codes.md`)
 - [x] Exe packaging — `build.bat`, `launch_omnium.bat`, single-file publish (v0.1.0)
+- [x] Time series price chart (OxyPlot LineSeries, 90-day close prices)
+- [x] Paginated stock browser (10 per page, Previous/Next navigation)
+- [x] Email verification service (Gmail SMTP, dev-mode fallback)
+- [x] ML trading algorithm (scikit-learn LinearRegression)
 
 ### Auth
 - [x] Registration with username/password validation
@@ -103,10 +107,10 @@
 5. ~~**Algorithm switching endpoint**~~ DONE (2026-03-31)
    - `POST /trading/switch`, `POST /trading/config`, `GET /trading/config` all wired
 
-6. **ML algorithm**
-   - scikit-learn LinearRegression or Random Forest
-   - Train on historical price data, predict next-day direction
-   - Who: ML team member | Effort: 2-3 sessions
+6. ~~**ML algorithm**~~ DONE (2026-04-01)
+   - scikit-learn LinearRegression trained on SMA ratios, momentum, volatility
+   - Integrated into AlgorithmSwitcher as "ml" algorithm
+   - Switchable at runtime via `POST /trading/switch {"algorithm": "ml"}`
 
 7. ~~**Backtesting**~~ DONE (2026-03-31)
    - `POST /backtest/run` in `src/omnium/backtesting/backtest.py`
@@ -121,10 +125,10 @@
    - Only matters when deployed on shared server
    - Who: Brady | Effort: 1-2 sessions
 
-10. **Email verification**
-    - `email_service.py` exists somewhere but isn't integrated
-    - Gmail SMTP creds need to go in `.env`
-    - Who: Brady | Effort: 1 session
+10. ~~**Email verification**~~ DONE (2026-04-01)
+    - `src/omnium/authentication/email_service.py` — Gmail SMTP with dev-mode fallback
+    - API: `POST /auth/send-verification`, `POST /auth/verify-email`
+    - Gmail App Password creds go in `.env` (OMNIUM_EMAIL_ADDRESS, OMNIUM_EMAIL_PASSWORD)
 
 11. ~~**Automate dev setup**~~ DONE (2026-04-01)
     - `setup_db.py` — installs MariaDB, creates DB, runs schema, seeds data

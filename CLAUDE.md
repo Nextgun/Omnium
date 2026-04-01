@@ -28,12 +28,14 @@ Omnium/
 │   │   ├── seed.py             # Seeds DJIA stocks from Yahoo Finance
 │   │   └── schema.sql          # 4 tables: assets, prices, accounts, trades
 │   ├── authentication/
-│   │   └── auth_system.py      # Login, registration, lockout (DONE)
+│   │   ├── auth_system.py      # Login, registration, lockout (DONE)
+│   │   └── email_service.py    # Email verification via Gmail SMTP (DONE)
 │   ├── search/
 │   │   └── search.py           # Asset search by symbol/name (DONE)
 │   ├── algorithms/
 │   │   ├── cs_algorithm.py     # Mean-reversion buy/sell algorithm (DONE)
-│   │   └── switcher.py         # Runtime algorithm switching (DONE)
+│   │   ├── ml_algorithm.py     # ML LinearRegression trading algorithm (DONE)
+│   │   └── switcher.py         # Runtime algorithm switching — CS + ML (DONE)
 │   ├── orchestration/
 │   │   └── orchestrator.py     # Connects algorithm to DB, executes trades (DONE)
 │   ├── backtesting/
@@ -58,7 +60,7 @@ Omnium/
 ├── .env.example                # Template for local DB config
 ├── build.bat                   # Build single exe in dist/ folder
 ├── launch_omnium.bat           # Start MariaDB + Flask + WPF in one click
-├── requirements.txt            # flask, mariadb, python-dotenv, yfinance, pytest, ruff
+├── requirements.txt            # flask, mariadb, python-dotenv, yfinance, scikit-learn, numpy, pytest, ruff
 ├── setup_dev.py                # One-time dev environment setup (conda env + deps)
 ├── setup_db.py                 # One-time DB setup (installs MariaDB + schema + seed)
 └── sonar-project.properties    # SonarQube config (bane.tamucc.edu:9000)
@@ -81,6 +83,8 @@ All endpoints (see docs/api-guide.md for full details):
 - GET /prices/{asset_id}?limit=30, GET /prices/{asset_id}/latest
 - GET /account/{id}, GET /account/{id}/trades, GET /account/{id}/position/{asset_id}
 - POST /auth/register, POST /auth/login
+- POST /auth/send-verification, POST /auth/verify-email
+- GET /assets?page={page}&per_page={per_page}
 - POST /trading/tick, GET /trading/status/{account_id}/{asset_id}
 - POST /trading/config, GET /trading/config, POST /trading/switch
 - POST /backtest/run

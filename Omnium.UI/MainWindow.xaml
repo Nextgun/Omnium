@@ -596,7 +596,7 @@
                 <StackPanel>
                     <TextBlock Text="About Omnium" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
                     <TextBlock Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"
-                               Text="Omnium v0.1.0 — Modular Day-Trading Platform&#x0a;&#x0a;Built by QuantumShell for COSC 3370 at TAMUCC.&#x0a;&#x0a;Features:&#x0a;  • Rule-based trading algorithm (mean reversion)&#x0a;  • Real-time market data from Yahoo Finance&#x0a;  • Paper trading with simulated accounts&#x0a;  • Backtesting engine for strategy validation&#x0a;  • Multi-strategy comparison and evaluation&#x0a;&#x0a;Architecture: WPF Desktop → Flask REST API → MariaDB&#x0a;&#x0a;Team: QuantumShell — TAMUCC COSC 3370"/>
+                               Text="Omnium v0.1.0 — Modular Day-Trading Platform&#x0a;&#x0a;Built by QuantumShell for COSC 3370 at TAMUCC.&#x0a;&#x0a;Features:&#x0a;  • Rule-based trading algorithm (mean reversion)&#x0a;  • ML trading algorithm (Linear Regression)&#x0a;  • Runtime algorithm switching&#x0a;  • Real-time market data from Yahoo Finance&#x0a;  • Paper trading with simulated accounts&#x0a;  • Backtesting engine for strategy validation&#x0a;  • Multi-strategy comparison and evaluation&#x0a;  • Interactive price charts (OxyPlot)&#x0a;  • Paginated stock browser&#x0a;  • Email verification for registration&#x0a;&#x0a;Architecture: WPF Desktop → Flask REST API → MariaDB&#x0a;&#x0a;Team: QuantumShell — TAMUCC COSC 3370"/>
                 </StackPanel>
             </Border>
 
