@@ -51,14 +51,14 @@
 
 ### P0 — Must have for demo (by April 14)
 
-1. **Test the API end-to-end**
+1. ~~**Integrate trading algorithm**~~ DONE (2026-03-31)
+   - CS mean-reversion algorithm in `src/omnium/algorithms/cs_algorithm.py`
+   - Orchestrator in `src/omnium/orchestration/orchestrator.py`
+   - All trading endpoints wired into `api.py`
+
+2. **Test the API end-to-end**
    - Start Flask server, hit every endpoint, verify DB connection
    - Who: You | Effort: 1 session
-
-2. **Integrate trading algorithm**
-   - `trading_algorithm.py` (mean-reversion) exists on another branch but isn't in `src/omnium/algorithms/` yet
-   - Wire into API: `POST /trading/tick`
-   - Who: You + algorithm owner | Effort: 1-2 sessions
 
 3. **Connect WPF frontend to API**
    - WPF app is on branch `11-create-interface-for-switching-between-decision-modules`
@@ -72,24 +72,19 @@
 
 ### P1 — Should have
 
-5. **Algorithm switching endpoint**
-   - `POST /trading/switch` — switch between CS and ML algorithms at runtime
-   - `POST /trading/config` — update algorithm parameters
-   - Who: Algorithm team | Effort: 1 session
+5. ~~**Algorithm switching endpoint**~~ DONE (2026-03-31)
+   - `POST /trading/switch`, `POST /trading/config`, `GET /trading/config` all wired
 
 6. **ML algorithm**
    - scikit-learn LinearRegression or Random Forest
    - Train on historical price data, predict next-day direction
    - Who: ML team member | Effort: 2-3 sessions
 
-7. **Backtesting**
-   - `POST /backtest/run` — replay historical prices through an algorithm
-   - Compare algorithm performance on past data
-   - Who: TBD | Effort: 2 sessions
+7. ~~**Backtesting**~~ DONE (2026-03-31)
+   - `POST /backtest/run` in `src/omnium/backtesting/backtest.py`
 
-8. **Evaluation / comparison**
-   - `GET /evaluation/compare` — side-by-side metrics for CS vs ML
-   - Who: TBD | Effort: 1 session
+8. ~~**Evaluation / comparison**~~ DONE (2026-03-31)
+   - `GET /evaluation/compare` in `src/omnium/evaluation/compare.py`
 
 ### P2 — Nice to have
 
@@ -137,12 +132,13 @@ These remote branches may have work that needs to be pulled in:
 
 | Endpoint | Purpose | Depends On |
 |----------|---------|------------|
-| `POST /trading/tick` | Run one algorithm cycle on an asset | Trading algorithm |
-| `GET /trading/status/{account_id}/{asset_id}` | Current position + signal | Trading algorithm |
-| `POST /trading/config` | Update algorithm parameters | Algorithm switcher |
-| `POST /trading/switch` | Switch active algorithm | Algorithm switcher |
-| `POST /backtest/run` | Replay historical data | Backtesting module |
-| `GET /evaluation/compare` | Compare algorithm results | Evaluation module |
+| `POST /trading/tick` | Run one algorithm cycle on an asset | ~~Trading algorithm~~ DONE |
+| `GET /trading/status/{account_id}/{asset_id}` | Current position + signal | ~~Trading algorithm~~ DONE |
+| `POST /trading/config` | Update algorithm parameters | ~~Algorithm switcher~~ DONE |
+| `GET /trading/config` | Get current algorithm config | ~~Algorithm switcher~~ DONE |
+| `POST /trading/switch` | Switch active algorithm | ~~Algorithm switcher~~ DONE |
+| `POST /backtest/run` | Replay historical data | ~~Backtesting module~~ DONE |
+| `GET /evaluation/compare` | Compare algorithm results | ~~Evaluation module~~ DONE |
 
 ---
 
@@ -162,9 +158,16 @@ Omnium/
 │   │   └── auth_system.py    # Login + registration (DONE)
 │   ├── search/
 │   │   └── search.py         # Asset search (DONE)
-│   ├── algorithms/           # EMPTY — needs trading_algorithm.py
-│   ├── orchestration/        # EMPTY — needs orchestrator.py
-│   ├── trading/              # EMPTY — needs paper trading logic
+│   ├── algorithms/
+│   │   ├── cs_algorithm.py   # Mean-reversion algorithm (DONE)
+│   │   └── switcher.py       # Algorithm switching (DONE)
+│   ├── orchestration/
+│   │   └── orchestrator.py   # Connects algo to DB (DONE)
+│   ├── backtesting/
+│   │   └── backtest.py       # Historical replay (DONE)
+│   ├── evaluation/
+│   │   └── compare.py        # Strategy comparison (DONE)
+│   ├── trading/              # Paper trading (via orchestrator) (DONE)
 │   ├── models/               # Dataclasses: Asset, Price, Account, Trade
 │   └── utils/                # EventBus, Config, logging
 ├── tests/

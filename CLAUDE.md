@@ -31,9 +31,16 @@ Omnium/
 │   │   └── auth_system.py      # Login, registration, lockout (DONE)
 │   ├── search/
 │   │   └── search.py           # Asset search by symbol/name (DONE)
-│   ├── algorithms/             # TODO: integrate trading_algorithm.py
-│   ├── orchestration/          # TODO: integrate orchestrator.py
-│   ├── trading/                # TODO: paper trading logic
+│   ├── algorithms/
+│   │   ├── cs_algorithm.py     # Mean-reversion buy/sell algorithm (DONE)
+│   │   └── switcher.py         # Runtime algorithm switching (DONE)
+│   ├── orchestration/
+│   │   └── orchestrator.py     # Connects algorithm to DB, executes trades (DONE)
+│   ├── backtesting/
+│   │   └── backtest.py         # Replay historical prices through algorithm (DONE)
+│   ├── evaluation/
+│   │   └── compare.py          # Compare strategy configurations (DONE)
+│   ├── trading/                # Paper trading (handled by orchestrator for now)
 │   ├── models/__init__.py      # Dataclasses: Asset, Price, Account, Trade + enums
 │   └── utils/__init__.py       # EventBus, Config, setup_logging
 ├── tests/
@@ -57,22 +64,17 @@ Omnium/
 
 ## API (Flask on localhost:5000)
 
-Running endpoints (see docs/api-guide.md for full details):
-
-Running endpoints (see docs/api-guide.md for full details):
+All endpoints (see docs/api-guide.md for full details):
 
 - GET /health
 - GET /assets/search?q={query}, GET /assets/{id}
 - GET /prices/{asset_id}?limit=30, GET /prices/{asset_id}/latest
 - GET /account/{id}, GET /account/{id}/trades, GET /account/{id}/position/{asset_id}
 - POST /auth/register, POST /auth/login
-
-Endpoints still needed:
-
 - POST /trading/tick, GET /trading/status/{account_id}/{asset_id}
-- POST /trading/config, POST /trading/switch
+- POST /trading/config, GET /trading/config, POST /trading/switch
 - POST /backtest/run
-- GET /evaluation/compare
+- GET /evaluation/compare?asset_id={id}
 
 ## Code Style
 
@@ -88,5 +90,5 @@ Endpoints still needed:
 - The WPF UI is on branch 11-create-interface-for-switching-between-decision-modules
 - Don't break existing db.py functions — other modules depend on them
 - All API responses should be JSON with appropriate HTTP status codes
-- trading_algorithm.py and orchestrator.py exist on other branches but aren't integrated yet
+- CS trading algorithm and orchestrator are integrated; ML algorithm is a future addition
 - Git pre-commit hooks are disabled (team friction) — config preserved in setup_dev.py
