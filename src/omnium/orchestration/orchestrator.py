@@ -60,7 +60,7 @@ def tick(account_id: int, asset_id: int, switcher: AlgorithmSwitcher) -> TickRes
         reference_price = current_price
 
     # Algorithm decision
-    action = switcher.decide(current_price, reference_price, purchase_price, shares_held)
+    action = switcher.decide(current_price, reference_price, purchase_price, shares_held, asset_id)
 
     # Execute
     trade_executed = False
@@ -110,7 +110,7 @@ def get_status(account_id: int, asset_id: int, switcher: AlgorithmSwitcher) -> d
     history = db.get_price_history(asset_id, limit=20)
     reference_price = sum(float(p["close"]) for p in history) / len(history) if history else current_price
 
-    signal = switcher.decide(current_price, reference_price, purchase_price, shares_held)
+    signal = switcher.decide(current_price, reference_price, purchase_price, shares_held, asset_id)
 
     return {
         "account_id": account_id,

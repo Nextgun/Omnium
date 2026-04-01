@@ -8,8 +8,10 @@ flask>=3.0                  # REST API framework
 mariadb>=1.1                # MariaDB connector (requires MariaDB C connector)
 python-dotenv>=1.0          # Load .env files for local config
 
-# ── Data ──
+# ── Data & ML ──
 yfinance>=0.2               # Yahoo Finance — used by seed.py
+scikit-learn>=1.4            # ML trading algorithm (LinearRegression)
+numpy>=1.26                  # Numerical operations for ML features
 
 # ── Dev & Testing ──
 pytest>=7.4
