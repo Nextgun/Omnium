@@ -23,12 +23,24 @@ if errorlevel 1 (
     echo [1/3] MariaDB already running.
 )
 
-REM 2. Start Flask API in background
+REM 2. Find conda and start Flask API in background
 echo [2/3] Starting Flask API on localhost:5000...
-start /B "Omnium API" cmd /c "conda activate omnium-dev && python -m flask --app src.omnium.api run --no-debugger --no-reload 2>nul"
+set "CONDA_BAT="
+where conda >nul 2>&1 && set "CONDA_BAT=conda"
+if "%CONDA_BAT%"=="" if exist "%USERPROFILE%\anaconda3\condabin\conda.bat" set "CONDA_BAT=%USERPROFILE%\anaconda3\condabin\conda.bat"
+if "%CONDA_BAT%"=="" if exist "%USERPROFILE%\miniconda3\condabin\conda.bat" set "CONDA_BAT=%USERPROFILE%\miniconda3\condabin\conda.bat"
+if "%CONDA_BAT%"=="" if exist "%USERPROFILE%\miniforge3\condabin\conda.bat" set "CONDA_BAT=%USERPROFILE%\miniforge3\condabin\conda.bat"
+if "%CONDA_BAT%"=="" if exist "C:\ProgramData\anaconda3\condabin\conda.bat" set "CONDA_BAT=C:\ProgramData\anaconda3\condabin\conda.bat"
+
+if "%CONDA_BAT%"=="" (
+    echo WARNING: conda not found. Trying system python...
+    start /B "" cmd /c "python -m flask --app src.omnium.api run --no-debugger --no-reload 2>nul"
+) else (
+    start /B "" cmd /c "call "%CONDA_BAT%" activate omnium-dev && python -m flask --app src.omnium.api run --no-debugger --no-reload 2>nul"
+)
 
 REM Give the API a moment to start
-timeout /t 3 /nobreak >nul
+ping -n 4 127.0.0.1 >nul
 
 REM 3. Launch WPF app
 echo [3/3] Launching Omnium desktop app...

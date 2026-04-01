@@ -18,7 +18,7 @@ public partial class LoginWindow : Window
 
     private void Tab_Changed(object sender, RoutedEventArgs e)
     {
-        if (LoginTab == null) return;
+        if (LoginTab == null || SubmitButton == null) return;
 
         bool isLogin = LoginTab.IsChecked == true;
         SubmitButton.Content = isLogin ? "Login" : "Register";
