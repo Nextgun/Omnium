@@ -50,17 +50,57 @@ def _is_mariadb_running(config: dict) -> bool:
         return False
 
 
+def _find_mariadb_install() -> str | None:
+    """Find MariaDB install directory on disk."""
+    if platform.system() != "Windows":
+        if shutil.which("mysqld") or shutil.which("mariadbd"):
+            return "system"
+        return None
+
+    # Check common install paths
+    program_files = Path(os.environ.get("ProgramFiles", "C:/Program Files"))
+    for entry in program_files.iterdir() if program_files.exists() else []:
+        if entry.is_dir() and entry.name.lower().startswith("mariadb"):
+            mariadbd = entry / "bin" / "mariadbd.exe"
+            if mariadbd.exists():
+                return str(entry)
+    return None
+
+
 def _find_mariadb_service() -> bool:
-    """Check if MariaDB is installed as a Windows service."""
+    """Check if MariaDB is registered as a Windows service."""
     if platform.system() != "Windows":
         return shutil.which("mysqld") is not None or shutil.which("mariadbd") is not None
 
-    # Check Windows services
     result = subprocess.run(
         ["sc", "query", "MariaDB"],
         capture_output=True, text=True,
     )
     return "MariaDB" in result.stdout
+
+
+def _register_and_start_service(install_dir: str) -> bool:
+    """Register MariaDB as a Windows service and start it."""
+    mariadbd = Path(install_dir) / "bin" / "mariadbd.exe"
+
+    print(f"[setup_db] Registering MariaDB service from {install_dir}...")
+    # Try to register the service (needs admin)
+    result = subprocess.run(
+        [str(mariadbd), "--install", "MariaDB"],
+        capture_output=True, text=True,
+    )
+
+    if result.returncode != 0 and "exists" not in result.stderr.lower():
+        print("[setup_db] Could not register MariaDB service (needs admin).")
+        print()
+        print("  Run these commands in an admin PowerShell:")
+        print(f'    & "{mariadbd}" --install MariaDB')
+        print('    net start MariaDB')
+        print()
+        print("  Then re-run: python setup_db.py --seed")
+        return False
+
+    return _start_mariadb_service()
 
 
 def _start_mariadb_service() -> bool:
@@ -79,10 +119,12 @@ def _start_mariadb_service() -> bool:
         time.sleep(2)  # Give it a moment to accept connections
         return True
 
-    # net start might need admin — try sc
-    print("[setup_db] Could not start MariaDB service automatically.")
-    print("  Try running this in an admin terminal: net start MariaDB")
-    print("  Or start it from Services (Win+R -> services.msc)")
+    print("[setup_db] Could not start MariaDB service (needs admin).")
+    print()
+    print("  Run this in an admin PowerShell:")
+    print("    net start MariaDB")
+    print()
+    print("  Then re-run: python setup_db.py --seed")
     return False
 
 
@@ -92,10 +134,18 @@ def install_mariadb(config: dict) -> None:
         print("[setup_db] MariaDB is already running.")
         return
 
-    # Check if installed but not running
+    # Check if service exists and just needs starting
     if _find_mariadb_service():
-        print("[setup_db] MariaDB is installed but not running.")
+        print("[setup_db] MariaDB service found but not running.")
         if _start_mariadb_service():
+            return
+        sys.exit(1)
+
+    # Check if installed on disk but service not registered
+    install_dir = _find_mariadb_install()
+    if install_dir and install_dir != "system":
+        print(f"[setup_db] MariaDB found at {install_dir} but service not registered.")
+        if _register_and_start_service(install_dir):
             return
         sys.exit(1)
 
