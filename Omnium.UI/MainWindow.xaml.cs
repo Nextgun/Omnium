@@ -35,7 +35,7 @@ public partial class MainWindow : Window
         else
         {
             StatusDot.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
-            StatusText.Text = "API Offline — start Flask server";
+            StatusText.Text = "[E-201] API Offline — start Flask server";
         }
 
         // Load account info
@@ -82,7 +82,7 @@ public partial class MainWindow : Window
         }
         catch
         {
-            StatusBarText.Text = $"Refresh failed at {DateTime.Now:HH:mm:ss} — API may be offline";
+            StatusBarText.Text = $"[E-201] Refresh failed at {DateTime.Now:HH:mm:ss} — API may be offline";
         }
     }
 
@@ -147,7 +147,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            AccountDetailText.Text = "Could not load account. Is the API running?";
+            AccountDetailText.Text = "[E-202] Could not load account. Is the API running?";
         }
     }
 
@@ -168,7 +168,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            ConfigDetailText.Text = "Could not load config. Is the API running?";
+            ConfigDetailText.Text = "[E-203] Could not load config. Is the API running?";
         }
     }
 
@@ -182,7 +182,7 @@ public partial class MainWindow : Window
 
         if (account == null)
         {
-            PortfolioSummaryText.Text = "Could not load account.";
+            PortfolioSummaryText.Text = "[E-204] Could not load account.";
             return;
         }
 
@@ -288,7 +288,7 @@ public partial class MainWindow : Window
     {
         if (_selectedAssetId <= 0)
         {
-            TradeResultText.Text = "Select an asset first.";
+            TradeResultText.Text = "[E-300] Select an asset first.";
             return;
         }
 
@@ -312,7 +312,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            TradeResultText.Text = "API error — is the server running?";
+            TradeResultText.Text = "[E-301] Trade failed — is the API running?";
         }
     }
 
@@ -322,7 +322,7 @@ public partial class MainWindow : Window
     {
         if (_selectedAssetId <= 0)
         {
-            BacktestResultText.Text = "Select an asset first.";
+            BacktestResultText.Text = "[E-300] Select an asset first.";
             return;
         }
 
@@ -342,7 +342,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            BacktestResultText.Text = "Backtest failed — is the API running?";
+            BacktestResultText.Text = "[E-302] Backtest failed — is the API running?";
         }
     }
 
@@ -352,7 +352,7 @@ public partial class MainWindow : Window
     {
         if (_selectedAssetId <= 0)
         {
-            EvalSummaryText.Text = "Select an asset first.";
+            EvalSummaryText.Text = "[E-300] Select an asset first.";
             return;
         }
 
@@ -386,7 +386,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            EvalSummaryText.Text = "Evaluation failed — is the API running?";
+            EvalSummaryText.Text = "[E-303] Evaluation failed — is the API running?";
             EvalSummaryText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
         }
     }

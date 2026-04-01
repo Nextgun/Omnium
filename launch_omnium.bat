@@ -44,13 +44,13 @@ ping -n 4 127.0.0.1 >nul
 
 REM 3. Launch WPF app
 echo [3/3] Launching Omnium desktop app...
-if exist dist\Omnium.UI\Omnium.UI.exe (
-    start "" dist\Omnium.UI\Omnium.UI.exe
-) else if exist Omnium.UI\bin\Debug\net8.0-windows\Omnium.UI.exe (
-    start "" Omnium.UI\bin\Debug\net8.0-windows\Omnium.UI.exe
+if exist "%~dp0dist\Omnium.UI\Omnium.UI.exe" (
+    start "" "%~dp0dist\Omnium.UI\Omnium.UI.exe"
+) else if exist "%~dp0Omnium.UI\bin\Debug\net8.0-windows\win-x64\Omnium.UI.exe" (
+    start "" "%~dp0Omnium.UI\bin\Debug\net8.0-windows\win-x64\Omnium.UI.exe"
 ) else (
     echo No exe found. Running with dotnet...
-    start "" cmd /c "cd Omnium.UI && dotnet run"
+    start "" cmd /c "cd /d "%~dp0Omnium.UI" && dotnet run"
 )
 
 echo.

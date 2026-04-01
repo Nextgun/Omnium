@@ -40,7 +40,7 @@ public partial class LoginWindow : Window
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            StatusMessage.Text = "Please enter username and password.";
+            StatusMessage.Text = "[E-101] Please enter username and password.";
             return;
         }
 
@@ -58,7 +58,7 @@ public partial class LoginWindow : Window
         if (result == null)
         {
             StatusMessage.Foreground = System.Windows.Media.Brushes.OrangeRed;
-            StatusMessage.Text = "Could not connect to API. Is the Flask server running?";
+            StatusMessage.Text = "[E-102] Could not connect to API. Is the Flask server running?";
             return;
         }
 
