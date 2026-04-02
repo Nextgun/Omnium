@@ -6,15 +6,16 @@
 
 ## Branch Cleanup
 
-### Safe to Delete (fully merged)
+### Safe to Delete (fully merged into this branch)
 
 These branches have **all their commits already in the current codebase**. Delete without worry.
 
 | Branch | Reason |
 |--------|--------|
-| `app-extras` | Fully merged, 0 unique commits |
 | `omnium-standalone` | Fully merged, 0 unique commits |
 | `11-create-interface-for-switching-between-decision-modules` | Fully merged, 0 unique commits |
+
+> **Note:** All "merged" checks are relative to the current branch (`claude/repo-cleanup-guide-7Szhi`), not `main`.
 
 ### Likely Safe to Delete (superseded/temporary work)
 
@@ -44,6 +45,7 @@ These branches have unique commits, but the work appears trivial, temporary, or 
 | Branch | Reason |
 |--------|--------|
 | `main` | Primary branch — never delete |
+| `app-extras` | **Not merged into `main`** — contains 34 commits with the bulk of the project (WPF app, API, ML algorithm, email service, packaging scripts, etc.). Keep until merged into `main`. |
 | `database` | Shares divergent history with main; keep until main is updated |
 
 ---
@@ -100,7 +102,6 @@ Once you've reviewed the branches above, here are the commands:
 
 ```bash
 # Delete fully merged branches (safe)
-git push origin --delete app-extras
 git push origin --delete omnium-standalone
 git push origin --delete 11-create-interface-for-switching-between-decision-modules
 
