@@ -1,0 +1,614 @@
+<!--
+    MainWindow.xaml — Omnium Trading Platform
+    Layout:
+        Row 0 = Top nav bar (OMNIUM title + nav buttons)
+        Row 1 = Ticker tab bar (search box + asset tabs)
+        Row 2 = Main content (sidebar + workspace panels)
+-->
+
+<Window x:Class="Omnium.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        mc:Ignorable="d"
+        Title="Omnium — Trading Platform"
+        Height="900"
+        Width="1600">
+
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF202020" Offset="1"/>
+            <GradientStop Color="#FF1A203A" Offset="0"/>
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <Window.Resources>
+        <!-- Sidebar button style -->
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Foreground" Value="#E6EAF2"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" Background="#FF2F3545" BorderBrush="#FF3C445A"
+                                BorderThickness="1" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#FF384058"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#FF242B3C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Top nav tab style -->
+        <Style x:Key="TopNavTabStyle" TargetType="Button">
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="MinWidth" Value="88"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#C9D1E8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="Bg" Background="Transparent"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border Width="1" HorizontalAlignment="Right" Background="#22FFFFFF"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#22FFFFFF"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Panel card style -->
+        <Style x:Key="PanelCard" TargetType="Border">
+            <Setter Property="Background" Value="#FF2F3545"/>
+            <Setter Property="BorderBrush" Value="#FF3C445A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+
+        <!-- Action button style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" Background="#1E3A8A" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#2563EB"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#1D4ED8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44"/>   <!-- Nav bar -->
+            <RowDefinition Height="44"/>   <!-- Search/ticker bar -->
+            <RowDefinition Height="*"/>    <!-- Content -->
+            <RowDefinition Height="26"/>   <!-- Status bar -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══ ROW 0: TOP NAV BAR ═══ -->
+        <Border Grid.Row="0" Grid.ColumnSpan="2" BorderBrush="#2FFFFFFF" BorderThickness="0,0,0,1">
+            <Grid>
+                <TextBlock Text="OMNIUM" Margin="18,0,0,0" VerticalAlignment="Center"
+                           Foreground="#E6EAF2" FontSize="16" FontWeight="SemiBold"/>
+
+                <StackPanel Orientation="Horizontal" Margin="220,0,0,0" VerticalAlignment="Stretch">
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="DASHBOARD" Click="NavDashboard_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="TRADE" Click="NavTrade_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="BACKTEST" Click="NavBacktest_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="CHART" Click="NavChart_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="BROWSE" Click="NavBrowse_Click"/>
+                    <Button Style="{StaticResource TopNavTabStyle}" Content="ACCOUNT" Click="NavAccount_Click"/>
+                </StackPanel>
+
+                <!-- User + Connection status -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0">
+                    <TextBlock x:Name="UserNameText" Text="" Foreground="#60A5FA" FontSize="12" Margin="0,0,16,0"/>
+                    <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#EF4444" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="StatusText" Text="Disconnected" Foreground="#8FA1C7" FontSize="12"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══ ROW 1: SEARCH BAR ═══ -->
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#FF1A1F2E" BorderBrush="#1FFFFFFF" BorderThickness="0,0,0,1">
+            <Grid Margin="18,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search box -->
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SearchBox" Grid.Column="0" Height="30"
+                             Background="#FF2F3545" Foreground="White" BorderBrush="#FF3C445A"
+                             Padding="10,4" FontSize="13" VerticalContentAlignment="Center"
+                             KeyDown="SearchBox_KeyDown">
+                        <TextBox.Resources>
+                            <Style TargetType="Border"><Setter Property="CornerRadius" Value="6,0,0,6"/></Style>
+                        </TextBox.Resources>
+                    </TextBox>
+                    <Button Grid.Column="1" Content="Search" Height="30" Padding="14,0"
+                            Style="{StaticResource ActionButton}" Click="SearchButton_Click"/>
+                </Grid>
+
+                <!-- Account info -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="Account:" Foreground="#8FA1C7" FontSize="13" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="AccountCashText" Text="--" Foreground="#10B981" FontSize="13" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══ ROW 2: SIDEBAR ═══ -->
+        <Border Grid.Row="2" Grid.Column="0" BorderThickness="0,0,1,0" BorderBrush="#1FFFFFFF">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- Search results -->
+                    <RowDefinition Height="*"/>     <!-- Watchlist -->
+                    <RowDefinition Height="Auto"/>  <!-- Status -->
+                </Grid.RowDefinitions>
+
+                <!-- Search results list -->
+                <StackPanel Grid.Row="0" Margin="10,10,10,0">
+                    <TextBlock Text="SEARCH RESULTS" Foreground="#8FA1C7" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
+                    <ListBox x:Name="SearchResultsList" MaxHeight="200"
+                             Background="Transparent" BorderThickness="0" Foreground="White"
+                             SelectionChanged="SearchResultsList_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="4,2">
+                                    <TextBlock Text="{Binding Symbol}" Foreground="#60A5FA" FontWeight="SemiBold" Width="60"/>
+                                    <TextBlock Text="{Binding Name}" Foreground="#C9D1E8"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Padding" Value="4,2"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF384058"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#1E3A8A"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </StackPanel>
+
+                <!-- Sidebar actions -->
+                <StackPanel Grid.Row="1" Margin="10,14">
+                    <TextBlock Text="ACTIONS" Foreground="#8FA1C7" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📊 Dashboard" Click="NavDashboard_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📈 Trade Selected" Click="NavTrade_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="🔄 Run Backtest" Click="NavBacktest_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="⚖️ Compare Strategies" Click="NavEvaluate_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="💰 Account Details" Click="NavAccount_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="⚙️ Algorithm Config" Click="NavConfig_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📋 Portfolio" Click="NavPortfolio_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📉 Price Chart" Click="NavChart_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="🗂️ Browse Stocks" Click="NavBrowse_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="ℹ️ About" Click="NavAbout_Click"/>
+                </StackPanel>
+
+                <!-- Bottom status -->
+                <TextBlock Grid.Row="2" x:Name="SidebarStatus" Text="Ready"
+                           Margin="14,0,0,14" Foreground="#9AA6C1" FontSize="11"/>
+            </Grid>
+        </Border>
+
+        <!-- ═══ ROW 2: MAIN WORKSPACE ═══ -->
+        <Grid Grid.Row="2" Grid.Column="1" Margin="16,14,16,16">
+
+            <!-- All panels stacked; visibility toggled by code-behind -->
+
+            <!-- DASHBOARD PANEL -->
+            <Grid x:Name="DashboardPanel" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Dashboard" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Asset info card -->
+                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PanelCard}" Margin="0,0,8,8">
+                        <StackPanel>
+                            <TextBlock Text="Selected Asset" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="AssetSymbolText" Text="--" Foreground="White" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock x:Name="AssetNameText" Text="Search for a stock to begin" Foreground="#9AA6C1" FontSize="13"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <TextBlock Text="Price: " Foreground="#8FA1C7" FontSize="15"/>
+                                <TextBlock x:Name="AssetPriceText" Text="--" Foreground="#10B981" FontSize="15" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Trading signal card -->
+                    <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource PanelCard}" Margin="8,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Trading Signal" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="SignalText" Text="--" Foreground="White" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock x:Name="SignalAlgoText" Text="No algorithm active" Foreground="#9AA6C1" FontSize="13"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <TextBlock Text="Shares held: " Foreground="#8FA1C7" FontSize="15"/>
+                                <TextBlock x:Name="SharesHeldText" Text="0" Foreground="White" FontSize="15"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Price history card -->
+                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource PanelCard}" Margin="0,8,8,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Recent Prices" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <ListBox Grid.Row="1" x:Name="PriceHistoryList" Background="Transparent"
+                                     BorderThickness="0" Foreground="White" FontSize="12">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="70"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Foreground="#9AA6C1"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Open, StringFormat='{}{0:F2}'}" Foreground="#C9D1E8"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding High, StringFormat='{}{0:F2}'}" Foreground="#10B981"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Low, StringFormat='{}{0:F2}'}" Foreground="#EF4444"/>
+                                            <TextBlock Grid.Column="4" Text="{Binding Close, StringFormat='{}{0:F2}'}" Foreground="White" FontWeight="SemiBold"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Trade history card -->
+                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource PanelCard}" Margin="8,8,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Recent Trades" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <ListBox Grid.Row="1" x:Name="TradeHistoryList" Background="Transparent"
+                                     BorderThickness="0" Foreground="White" FontSize="12">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" FontWeight="SemiBold"
+                                                       Text="{Binding Side}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Side}" Value="BUY">
+                                                                <Setter Property="Foreground" Value="#10B981"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Side}" Value="SELL">
+                                                                <Setter Property="Foreground" Value="#EF4444"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="1" Text="{Binding Quantity}" Foreground="#C9D1E8"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding Price, StringFormat='${0:F2}'}" Foreground="White"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Timestamp}" Foreground="#9AA6C1" FontSize="11"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- TRADE PANEL -->
+            <Border x:Name="TradePanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Execute Trade" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="TradeAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <Button Content="Run Algorithm Tick" Style="{StaticResource ActionButton}"
+                            Width="200" HorizontalAlignment="Left" Click="RunTick_Click"/>
+                    <TextBlock x:Name="TradeResultText" Text="" Foreground="#10B981" FontSize="14"
+                               Margin="0,14,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- BACKTEST PANEL -->
+            <Border x:Name="BacktestPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Backtest" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="BacktestAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <Button Grid.Row="2" Content="Run Backtest (90 days)" Style="{StaticResource ActionButton}"
+                            Width="220" HorizontalAlignment="Left" Click="RunBacktest_Click"/>
+                    <TextBlock Grid.Row="3" x:Name="BacktestResultText" Text="" Foreground="#C9D1E8" FontSize="13"
+                               Margin="0,14,0,14" TextWrapping="Wrap"/>
+                    <DataGrid Grid.Row="4" x:Name="BacktestTradeGrid" AutoGenerateColumns="False"
+                              Background="Transparent" Foreground="White" BorderThickness="0"
+                              HeadersVisibility="Column" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#FF3C445A" RowBackground="#FF2F3545"
+                              AlternatingRowBackground="#FF262C3A" Visibility="Collapsed">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#FF1A1F2E"/>
+                                <Setter Property="Foreground" Value="#8FA1C7"/>
+                                <Setter Property="Padding" Value="8,4"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Bar" Binding="{Binding Bar}" Width="50"/>
+                            <DataGridTextColumn Header="Action" Binding="{Binding Action}" Width="60"/>
+                            <DataGridTextColumn Header="Price" Binding="{Binding Price}" Width="80"/>
+                            <DataGridTextColumn Header="Shares" Binding="{Binding Shares}" Width="60"/>
+                            <DataGridTextColumn Header="Cash" Binding="{Binding Cash}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- EVALUATE PANEL -->
+            <Border x:Name="EvaluatePanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Strategy Comparison" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="EvalAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <Button Grid.Row="2" Content="Compare Strategies" Style="{StaticResource ActionButton}"
+                            Width="200" HorizontalAlignment="Left" Click="RunEvaluate_Click"/>
+                    <TextBlock Grid.Row="3" x:Name="EvalSummaryText" Text="" Foreground="#10B981" FontSize="14"
+                               Margin="0,14,0,10"/>
+                    <DataGrid Grid.Row="4" x:Name="EvalResultGrid" AutoGenerateColumns="False"
+                              Background="Transparent" Foreground="White" BorderThickness="0"
+                              HeadersVisibility="Column" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#FF3C445A" RowBackground="#FF2F3545"
+                              AlternatingRowBackground="#FF262C3A" Visibility="Collapsed">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#FF1A1F2E"/>
+                                <Setter Property="Foreground" Value="#8FA1C7"/>
+                                <Setter Property="Padding" Value="8,4"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Strategy" Binding="{Binding Strategy}" Width="120"/>
+                            <DataGridTextColumn Header="Return %" Binding="{Binding ReturnPct}" Width="80"/>
+                            <DataGridTextColumn Header="Total Value" Binding="{Binding TotalValue}" Width="100"/>
+                            <DataGridTextColumn Header="Trades" Binding="{Binding Trades}" Width="60"/>
+                            <DataGridTextColumn Header="Buys" Binding="{Binding Buys}" Width="60"/>
+                            <DataGridTextColumn Header="Sells" Binding="{Binding Sells}" Width="60"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- ACCOUNT PANEL -->
+            <Border x:Name="AccountPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Account Details" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="AccountDetailText" Text="Loading..." Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- CONFIG PANEL -->
+            <Border x:Name="ConfigPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="Algorithm Configuration" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="ConfigDetailText" Text="Loading..." Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- PORTFOLIO PANEL -->
+            <Border x:Name="PortfolioPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Portfolio Overview" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="PortfolioSummaryText" Text="" Foreground="#10B981" FontSize="16" Margin="0,0,0,14"/>
+                    <ListBox Grid.Row="2" x:Name="PortfolioList" Background="Transparent"
+                             BorderThickness="0" Foreground="White" FontSize="13">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Symbol}" Foreground="#60A5FA" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Shares}" Foreground="#C9D1E8"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Value}" Foreground="#10B981"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding PnL}" Foreground="#9AA6C1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- CHART PANEL -->
+            <Border x:Name="ChartPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Price Chart" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <TextBlock Grid.Row="1" x:Name="ChartAssetLabel" Text="Select an asset to view its price chart"
+                               Foreground="#9AA6C1" FontSize="14" Margin="0,0,0,10"/>
+                    <oxy:PlotView Grid.Row="2" x:Name="PriceChartView" MinHeight="400"
+                                  Background="Transparent"/>
+                </Grid>
+            </Border>
+
+            <!-- BROWSE PANEL -->
+            <Border x:Name="BrowsePanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Browse Stocks" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="BrowsePageInfo" Text="Loading..." Foreground="#8FA1C7" FontSize="13" Margin="0,0,0,10"/>
+                    <DataGrid Grid.Row="2" x:Name="BrowseGrid" AutoGenerateColumns="False"
+                              Background="Transparent" Foreground="White" BorderThickness="0"
+                              HeadersVisibility="Column" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#FF3C445A" RowBackground="#FF2F3545"
+                              AlternatingRowBackground="#FF262C3A" SelectionMode="Single"
+                              MouseDoubleClick="BrowseGrid_DoubleClick">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#FF1A1F2E"/>
+                                <Setter Property="Foreground" Value="#8FA1C7"/>
+                                <Setter Property="Padding" Value="8,4"/>
+                                <Setter Property="FontSize" Value="13"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                            <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#60A5FA"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                        <Button Content="Previous" Style="{StaticResource ActionButton}" Width="100"
+                                Margin="0,0,10,0" Click="BrowsePrev_Click"/>
+                        <TextBlock x:Name="BrowsePageNum" Text="Page 1" Foreground="White" FontSize="14"
+                                   VerticalAlignment="Center" Margin="10,0"/>
+                        <Button Content="Next" Style="{StaticResource ActionButton}" Width="100"
+                                Margin="10,0,0,0" Click="BrowseNext_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ABOUT PANEL -->
+            <Border x:Name="AboutPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
+                <StackPanel>
+                    <TextBlock Text="About Omnium" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"
+                               Text="Omnium v0.1.0 — Modular Day-Trading Platform&#x0a;&#x0a;Built by QuantumShell for COSC 3370 at TAMUCC.&#x0a;&#x0a;Features:&#x0a;  • Rule-based trading algorithm (mean reversion)&#x0a;  • ML trading algorithm (Linear Regression)&#x0a;  • Runtime algorithm switching&#x0a;  • Real-time market data from Yahoo Finance&#x0a;  • Paper trading with simulated accounts&#x0a;  • Backtesting engine for strategy validation&#x0a;  • Multi-strategy comparison and evaluation&#x0a;  • Interactive price charts (OxyPlot)&#x0a;  • Paginated stock browser&#x0a;  • Email verification for registration&#x0a;&#x0a;Architecture: WPF Desktop → Flask REST API → MariaDB&#x0a;&#x0a;Team: QuantumShell — TAMUCC COSC 3370"/>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
+        <!-- ═══ ROW 3: STATUS BAR ═══ -->
+        <Border Grid.Row="3" Grid.ColumnSpan="2" Background="#FF161A26" BorderBrush="#1FFFFFFF" BorderThickness="0,1,0,0">
+            <Grid Margin="14,0">
+                <TextBlock x:Name="StatusBarText" Text="Ready" Foreground="#6B7280" FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="Omnium v0.1.0" Foreground="#4B5563" FontSize="11"
+                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
