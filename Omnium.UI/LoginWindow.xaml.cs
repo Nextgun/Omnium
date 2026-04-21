@@ -39,6 +39,15 @@ public partial class LoginWindow : Window
 
     private async Task DoSubmitAsync()
     {
+        // Handle "Skip Verification" button
+        if (SubmitButton.Content.ToString() == "Skip Verification" && !string.IsNullOrEmpty(_pendingUsername))
+        {
+            LoggedInUser = _pendingUsername;
+            DialogResult = true;
+            Close();
+            return;
+        }
+
         var username = UsernameBox.Text.Trim();
         var password = PasswordBox.Password;
 

@@ -9,7 +9,6 @@
 
 <Window x:Class="Omnium.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Icon="logo.ico"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -21,8 +20,8 @@
 
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="{DynamicResource BgGradientBottom}" Offset="1"/>
-            <GradientStop Color="{DynamicResource BgGradientTop}" Offset="0"/>
+            <GradientStop Color="{StaticResource BgGradientBottom}" Offset="1"/>
+            <GradientStop Color="{StaticResource BgGradientTop}" Offset="0"/>
         </LinearGradientBrush>
     </Window.Background>
 
