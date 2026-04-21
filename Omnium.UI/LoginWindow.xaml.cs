@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Omnium.UI.Services;
 
 namespace Omnium.UI;
@@ -7,6 +8,7 @@ namespace Omnium.UI;
 public partial class LoginWindow : Window
 {
     private readonly ApiClient _api = new();
+    private string _pendingUsername = "";
 
     public string LoggedInUser { get; private set; } = "";
 
@@ -23,6 +25,8 @@ public partial class LoginWindow : Window
         bool isLogin = LoginTab.IsChecked == true;
         SubmitButton.Content = isLogin ? "Login" : "Register";
         PasswordHint.Visibility = isLogin ? Visibility.Collapsed : Visibility.Visible;
+        EmailPanel.Visibility = isLogin ? Visibility.Collapsed : Visibility.Visible;
+        VerifyPanel.Visibility = Visibility.Collapsed;
         StatusMessage.Text = "";
     }
 
@@ -40,12 +44,12 @@ public partial class LoginWindow : Window
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            StatusMessage.Text = "[E-101] Please enter username and password.";
+            StatusMessage.Text = "Please enter username and password.";
             return;
         }
 
         SubmitButton.IsEnabled = false;
-        StatusMessage.Foreground = System.Windows.Media.Brushes.Gray;
+        StatusMessage.Foreground = (SolidColorBrush)FindResource("TextMuted");
         StatusMessage.Text = "Connecting...";
 
         bool isLogin = LoginTab.IsChecked == true;
@@ -57,21 +61,64 @@ public partial class LoginWindow : Window
 
         if (result == null)
         {
-            StatusMessage.Foreground = System.Windows.Media.Brushes.OrangeRed;
-            StatusMessage.Text = "[E-102] Could not connect to API. Is the Flask server running?";
+            StatusMessage.Foreground = (SolidColorBrush)FindResource("AccentRed");
+            StatusMessage.Text = "Could not connect to API. Is the Flask server running?";
             return;
         }
 
         if (result.Success)
         {
+            if (!isLogin && !string.IsNullOrWhiteSpace(EmailBox.Text))
+            {
+                // Registration succeeded — send verification email
+                _pendingUsername = username;
+                StatusMessage.Foreground = (SolidColorBrush)FindResource("AccentGreen");
+                StatusMessage.Text = "Registered! Sending verification email...";
+
+                var emailResult = await _api.SendVerificationAsync(username, EmailBox.Text.Trim());
+                if (emailResult?.Success == true)
+                {
+                    VerifyPanel.Visibility = Visibility.Visible;
+                    StatusMessage.Text = "Verification code sent. Enter it below, or skip to continue.";
+                    SubmitButton.Content = "Skip Verification";
+                    return;
+                }
+                else
+                {
+                    StatusMessage.Text = "Registered! (Verification email failed — continuing without it)";
+                }
+            }
+
             LoggedInUser = username;
             DialogResult = true;
             Close();
         }
         else
         {
-            StatusMessage.Foreground = System.Windows.Media.Brushes.OrangeRed;
+            StatusMessage.Foreground = (SolidColorBrush)FindResource("AccentRed");
             StatusMessage.Text = result.Message;
+        }
+    }
+
+    private async void Verify_Click(object sender, RoutedEventArgs e)
+    {
+        var code = VerifyCodeBox.Text.Trim();
+        if (string.IsNullOrEmpty(code)) return;
+
+        VerifyBtn.IsEnabled = false;
+        var result = await _api.VerifyEmailAsync(_pendingUsername, code);
+        VerifyBtn.IsEnabled = true;
+
+        if (result?.Success == true)
+        {
+            LoggedInUser = _pendingUsername;
+            DialogResult = true;
+            Close();
+        }
+        else
+        {
+            StatusMessage.Foreground = (SolidColorBrush)FindResource("AccentRed");
+            StatusMessage.Text = result?.Message ?? "Verification failed.";
         }
     }
 }

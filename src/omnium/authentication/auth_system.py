@@ -6,6 +6,8 @@ date last modified: 3/6/2026
 ==========================
 '''
 
+from __future__ import annotations
+
 import hashlib
 import src.omnium.data.db as db
 from typing import Tuple

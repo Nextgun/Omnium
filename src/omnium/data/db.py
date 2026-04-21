@@ -11,6 +11,8 @@ Other modules calls these functions and gets back plain Python dicts.
 Install the driver once with:  pip install pymysql
 """
 
+from __future__ import annotations
+
 import os
 import pymysql
 import sys

@@ -9,6 +9,8 @@ All responses are JSON. The WPF desktop app communicates with this API
 on localhost:5000.
 """
 
+from __future__ import annotations
+
 from flask import Flask, jsonify, request
 
 from src.omnium.data import db

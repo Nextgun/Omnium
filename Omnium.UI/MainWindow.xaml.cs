@@ -1,8 +1,10 @@
+using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Win32;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -15,11 +17,13 @@ public partial class MainWindow : Window
     private readonly ApiClient _api = new();
     private int _selectedAssetId;
     private string _selectedSymbol = "";
-    private const int DefaultAccountId = 1;
+    private int _accountId = 1;
     private System.Windows.Threading.DispatcherTimer? _refreshTimer;
     private int _browsePage = 1;
     private int _browseTotalPages = 1;
     private bool _isDarkTheme = true;
+    private string _browseFilter = "";
+    private BacktestResultDto? _lastBacktest;
 
     public string LoggedInUser { get; set; } = "";
 
@@ -31,7 +35,6 @@ public partial class MainWindow : Window
 
     private async Task InitializeAsync()
     {
-        // Check API connection
         var healthy = await _api.HealthCheckAsync();
         if (healthy)
         {
@@ -41,17 +44,14 @@ public partial class MainWindow : Window
         else
         {
             StatusDot.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
-            StatusText.Text = "[E-201] API Offline — start Flask server";
+            StatusText.Text = "API Offline";
         }
 
-        // Load account info
         await RefreshAccountInfoAsync();
 
-        // Show logged-in user
         if (UserNameText != null && !string.IsNullOrEmpty(LoggedInUser))
             UserNameText.Text = LoggedInUser;
 
-        // Start auto-refresh timer (10s)
         _refreshTimer = new System.Windows.Threading.DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(10)
@@ -66,29 +66,29 @@ public partial class MainWindow : Window
 
         try
         {
-        var price = await _api.GetLatestPriceAsync(_selectedAssetId);
-        if (price != null)
-            AssetPriceText.Text = $"${price.Close:F2}";
+            var price = await _api.GetLatestPriceAsync(_selectedAssetId);
+            if (price != null)
+                AssetPriceText.Text = $"${price.Close:F2}";
 
-        var status = await _api.GetTradingStatusAsync(DefaultAccountId, _selectedAssetId);
-        if (status != null)
-        {
-            SignalText.Text = status.Signal;
-            SignalText.Foreground = new SolidColorBrush(status.Signal switch
+            var status = await _api.GetTradingStatusAsync(_accountId, _selectedAssetId);
+            if (status != null)
             {
-                "BUY" => (Color)ColorConverter.ConvertFromString("#10B981"),
-                "SELL" => (Color)ColorConverter.ConvertFromString("#EF4444"),
-                _ => (Color)ColorConverter.ConvertFromString("#8FA1C7")
-            });
-            SharesHeldText.Text = status.Shares_Held.ToString();
-        }
+                SignalText.Text = status.Signal;
+                SignalText.Foreground = new SolidColorBrush(status.Signal switch
+                {
+                    "BUY" => (Color)ColorConverter.ConvertFromString("#10B981"),
+                    "SELL" => (Color)ColorConverter.ConvertFromString("#EF4444"),
+                    _ => (Color)ColorConverter.ConvertFromString("#8FA1C7")
+                });
+                SharesHeldText.Text = status.Shares_Held.ToString();
+            }
 
-        await RefreshAccountInfoAsync();
-        StatusBarText.Text = $"Last refresh: {DateTime.Now:HH:mm:ss}";
+            await RefreshAccountInfoAsync();
+            StatusBarText.Text = $"Last refresh: {DateTime.Now:HH:mm:ss}";
         }
         catch
         {
-            StatusBarText.Text = $"[E-201] Refresh failed at {DateTime.Now:HH:mm:ss} — API may be offline";
+            StatusBarText.Text = $"Refresh failed at {DateTime.Now:HH:mm:ss} — API may be offline";
         }
     }
 
@@ -97,26 +97,16 @@ public partial class MainWindow : Window
     private void ShowPanel(string panel)
     {
         DashboardPanel.Visibility = panel == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
-        TradePanel.Visibility = panel == "trade" ? Visibility.Visible : Visibility.Collapsed;
         BacktestPanel.Visibility = panel == "backtest" ? Visibility.Visible : Visibility.Collapsed;
         EvaluatePanel.Visibility = panel == "evaluate" ? Visibility.Visible : Visibility.Collapsed;
-        AccountPanel.Visibility = panel == "account" ? Visibility.Visible : Visibility.Collapsed;
-        ConfigPanel.Visibility = panel == "config" ? Visibility.Visible : Visibility.Collapsed;
         PortfolioPanel.Visibility = panel == "portfolio" ? Visibility.Visible : Visibility.Collapsed;
         ChartPanel.Visibility = panel == "chart" ? Visibility.Visible : Visibility.Collapsed;
         BrowsePanel.Visibility = panel == "browse" ? Visibility.Visible : Visibility.Collapsed;
+        SettingsPanel.Visibility = panel == "settings" ? Visibility.Visible : Visibility.Collapsed;
         AboutPanel.Visibility = panel == "about" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void NavDashboard_Click(object sender, RoutedEventArgs e) => ShowPanel("dashboard");
-
-    private void NavTrade_Click(object sender, RoutedEventArgs e)
-    {
-        TradeAssetLabel.Text = _selectedAssetId > 0
-            ? $"Asset: {_selectedSymbol} (ID: {_selectedAssetId})"
-            : "No asset selected — search for one first";
-        ShowPanel("trade");
-    }
 
     private void NavBacktest_Click(object sender, RoutedEventArgs e)
     {
@@ -137,47 +127,10 @@ public partial class MainWindow : Window
         ShowPanel("evaluate");
     }
 
-    private async void NavAccount_Click(object sender, RoutedEventArgs e)
+    private async void NavSettings_Click(object sender, RoutedEventArgs e)
     {
-        ShowPanel("account");
-        AccountDetailText.Text = "Loading...";
-
-        var account = await _api.GetAccountAsync(DefaultAccountId);
-        if (account != null)
-        {
-            var trades = await _api.GetTradesAsync(DefaultAccountId);
-            AccountDetailText.Text =
-                $"Account ID: {account.Id}\n" +
-                $"Type: {account.Type}\n" +
-                $"Cash Balance: ${account.Cash_Balance:N2}\n" +
-                $"Created: {account.Created_At}\n" +
-                $"Total Trades: {trades.Count}";
-        }
-        else
-        {
-            AccountDetailText.Text = "[E-202] Could not load account. Is the API running?";
-        }
-    }
-
-    private async void NavConfig_Click(object sender, RoutedEventArgs e)
-    {
-        ShowPanel("config");
-        ConfigDetailText.Text = "Loading...";
-
-        var config = await _api.GetTradingConfigAsync();
-        if (config != null)
-        {
-            ConfigDetailText.Text =
-                $"Active Algorithm: {config.Algorithm}\n" +
-                $"Buy Threshold: {config.Buy_Threshold}%\n" +
-                $"Sell Threshold: {config.Sell_Threshold}%\n" +
-                $"Stop Loss: {config.Stop_Loss}%\n" +
-                $"Max Position: {config.Max_Position} shares";
-        }
-        else
-        {
-            ConfigDetailText.Text = "[E-203] Could not load config. Is the API running?";
-        }
+        ShowPanel("settings");
+        await LoadSettingsAsync();
     }
 
     private async void NavPortfolio_Click(object sender, RoutedEventArgs e)
@@ -185,16 +138,15 @@ public partial class MainWindow : Window
         ShowPanel("portfolio");
         PortfolioSummaryText.Text = "Loading positions...";
 
-        var account = await _api.GetAccountAsync(DefaultAccountId);
-        var trades = await _api.GetTradesAsync(DefaultAccountId);
+        var account = await _api.GetAccountAsync(_accountId);
+        var trades = await _api.GetTradesAsync(_accountId);
 
         if (account == null)
         {
-            PortfolioSummaryText.Text = "[E-204] Could not load account.";
+            PortfolioSummaryText.Text = "Could not load account.";
             return;
         }
 
-        // Calculate positions from trade history
         var positions = new Dictionary<int, (string Symbol, int Shares, decimal TotalCost)>();
         foreach (var t in trades)
         {
@@ -255,17 +207,14 @@ public partial class MainWindow : Window
         _selectedAssetId = asset.Id;
         _selectedSymbol = asset.Symbol;
 
-        // Update dashboard
         AssetSymbolText.Text = asset.Symbol;
         AssetNameText.Text = asset.Name;
         SidebarStatus.Text = $"Selected: {asset.Symbol}";
 
-        // Load price
         var price = await _api.GetLatestPriceAsync(asset.Id);
         AssetPriceText.Text = price != null ? $"${price.Close:F2}" : "--";
 
-        // Load trading signal
-        var status = await _api.GetTradingStatusAsync(DefaultAccountId, asset.Id);
+        var status = await _api.GetTradingStatusAsync(_accountId, asset.Id);
         if (status != null)
         {
             SignalText.Text = status.Signal;
@@ -279,24 +228,22 @@ public partial class MainWindow : Window
             SharesHeldText.Text = status.Shares_Held.ToString();
         }
 
-        // Load price history
         var history = await _api.GetPriceHistoryAsync(asset.Id, 15);
         PriceHistoryList.ItemsSource = history;
 
-        // Load trades for this asset
-        var trades = await _api.GetTradesAsync(DefaultAccountId);
+        var trades = await _api.GetTradesAsync(_accountId);
         TradeHistoryList.ItemsSource = trades.Where(t => t.Asset_Id == asset.Id).Take(20).ToList();
 
         ShowPanel("dashboard");
     }
 
-    // ── Trading ──
+    // ── Trading (integrated into Dashboard) ──
 
     private async void RunTick_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedAssetId <= 0)
         {
-            TradeResultText.Text = "[E-300] Select an asset first.";
+            TradeResultText.Text = "Select an asset first.";
             return;
         }
 
@@ -305,8 +252,11 @@ public partial class MainWindow : Window
             "Confirm Trade", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirm != MessageBoxResult.Yes) return;
 
+        RunTickBtn.IsEnabled = false;
         TradeResultText.Text = "Running algorithm...";
-        var result = await _api.TradingTickAsync(DefaultAccountId, _selectedAssetId);
+        var result = await _api.TradingTickAsync(_accountId, _selectedAssetId);
+        RunTickBtn.IsEnabled = true;
+
         if (result != null)
         {
             TradeResultText.Text = result.Message;
@@ -320,37 +270,74 @@ public partial class MainWindow : Window
         }
         else
         {
-            TradeResultText.Text = "[E-301] Trade failed — is the API running?";
+            TradeResultText.Text = "Trade failed — is the API running?";
         }
     }
 
-    // ── Backtest ──
+    // ── Backtest (with configurable days + export) ──
 
     private async void RunBacktest_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedAssetId <= 0)
         {
-            BacktestResultText.Text = "[E-300] Select an asset first.";
+            BacktestResultText.Text = "Select an asset first.";
             return;
         }
 
+        if (!int.TryParse(BacktestDaysBox.Text.Trim(), out int days) || days < 1)
+        {
+            BacktestResultText.Text = "Enter a valid number of days.";
+            return;
+        }
+
+        RunBacktestBtn.IsEnabled = false;
         BacktestResultText.Text = "Running backtest...";
-        var result = await _api.RunBacktestAsync(_selectedAssetId);
+        var result = await _api.RunBacktestAsync(_selectedAssetId, days);
+        RunBacktestBtn.IsEnabled = true;
+
         if (result != null)
         {
+            _lastBacktest = result;
             BacktestResultText.Text =
-                $"Symbol: {result.Symbol}\n" +
-                $"Algorithm: {result.Algorithm}\n" +
-                $"Starting Cash: ${result.Starting_Cash:N2}\n" +
-                $"Ending Cash: ${result.Ending_Cash:N2}\n" +
-                $"Total Value: ${result.Total_Value:N2}\n" +
-                $"Return: {result.Return_Pct}%\n" +
-                $"Trades: {result.Total_Trades} ({result.Buys} buys, {result.Sells} sells)\n" +
-                $"Shares Held: {result.Shares_Held}";
+                $"Symbol: {result.Symbol} | Algorithm: {result.Algorithm}\n" +
+                $"Starting: ${result.Starting_Cash:N2} → Ending: ${result.Ending_Cash:N2}\n" +
+                $"Total Value: ${result.Total_Value:N2} | Return: {result.Return_Pct}%\n" +
+                $"Trades: {result.Total_Trades} ({result.Buys} buys, {result.Sells} sells) | Shares: {result.Shares_Held}";
+            ExportBacktestBtn.Visibility = Visibility.Visible;
         }
         else
         {
-            BacktestResultText.Text = "[E-302] Backtest failed — is the API running?";
+            BacktestResultText.Text = "Backtest failed — is the API running?";
+            ExportBacktestBtn.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void ExportBacktest_Click(object sender, RoutedEventArgs e)
+    {
+        if (_lastBacktest == null) return;
+
+        var dialog = new SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            FileName = $"backtest_{_lastBacktest.Symbol}_{DateTime.Now:yyyyMMdd}.csv"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            var r = _lastBacktest;
+            var csv = "Field,Value\n" +
+                      $"Symbol,{r.Symbol}\n" +
+                      $"Algorithm,{r.Algorithm}\n" +
+                      $"Starting Cash,{r.Starting_Cash:F2}\n" +
+                      $"Ending Cash,{r.Ending_Cash:F2}\n" +
+                      $"Total Value,{r.Total_Value:F2}\n" +
+                      $"Return %,{r.Return_Pct}\n" +
+                      $"Total Trades,{r.Total_Trades}\n" +
+                      $"Buys,{r.Buys}\n" +
+                      $"Sells,{r.Sells}\n" +
+                      $"Shares Held,{r.Shares_Held}\n";
+            File.WriteAllText(dialog.FileName, csv);
+            StatusBarText.Text = $"Exported to {dialog.FileName}";
         }
     }
 
@@ -360,13 +347,16 @@ public partial class MainWindow : Window
     {
         if (_selectedAssetId <= 0)
         {
-            EvalSummaryText.Text = "[E-300] Select an asset first.";
+            EvalSummaryText.Text = "Select an asset first.";
             return;
         }
 
+        RunEvalBtn.IsEnabled = false;
         EvalSummaryText.Text = "Comparing strategies...";
         EvalResultGrid.Visibility = Visibility.Collapsed;
         var result = await _api.CompareAlgorithmsAsync(_selectedAssetId);
+        RunEvalBtn.IsEnabled = true;
+
         if (result.HasValue)
         {
             var json = result.Value;
@@ -394,8 +384,8 @@ public partial class MainWindow : Window
         }
         else
         {
-            EvalSummaryText.Text = "[E-303] Evaluation failed — is the API running?";
-            EvalSummaryText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
+            EvalSummaryText.Text = "Evaluation failed — is the API running?";
+            EvalSummaryText.Foreground = (SolidColorBrush)FindResource("AccentRed");
         }
     }
 
@@ -414,16 +404,13 @@ public partial class MainWindow : Window
         var history = await _api.GetPriceHistoryAsync(_selectedAssetId, 90);
         if (history.Count == 0)
         {
-            ChartAssetLabel.Text = "[E-304] No price data available for chart.";
+            ChartAssetLabel.Text = "No price data available for chart.";
             return;
         }
 
         ChartAssetLabel.Text = $"{_selectedSymbol} — Close Price (last {history.Count} days)";
-
-        // History is newest-first; reverse for chronological plot
         history.Reverse();
 
-        // Theme-aware chart colors
         var cardBg = ((SolidColorBrush)FindResource("CardBg")).Color;
         var borderColor = ((SolidColorBrush)FindResource("CardBorder")).Color;
         var textColor = ((SolidColorBrush)FindResource("TextSecondary")).Color;
@@ -481,7 +468,7 @@ public partial class MainWindow : Window
         PriceChartView.Model = model;
     }
 
-    // ── Browse ──
+    // ── Browse (with filter) ──
 
     private async void NavBrowse_Click(object sender, RoutedEventArgs e)
     {
@@ -492,10 +479,20 @@ public partial class MainWindow : Window
     private async Task LoadBrowsePageAsync()
     {
         BrowsePageInfo.Text = "Loading...";
+
+        if (!string.IsNullOrEmpty(_browseFilter))
+        {
+            var results = await _api.SearchAssetsAsync(_browseFilter);
+            BrowseGrid.ItemsSource = results;
+            BrowsePageInfo.Text = $"Filter: '{_browseFilter}' — {results.Count} result(s)";
+            BrowsePageNum.Text = "Filtered";
+            return;
+        }
+
         var result = await _api.GetAssetsPaginatedAsync(_browsePage, 10);
         if (result == null)
         {
-            BrowsePageInfo.Text = "[E-305] Could not load stocks. Is the API running?";
+            BrowsePageInfo.Text = "Could not load stocks. Is the API running?";
             return;
         }
 
@@ -507,23 +504,35 @@ public partial class MainWindow : Window
 
     private async void BrowsePrev_Click(object sender, RoutedEventArgs e)
     {
-        if (_browsePage > 1)
-        {
-            _browsePage--;
-            await LoadBrowsePageAsync();
-        }
+        if (_browsePage > 1) { _browsePage--; await LoadBrowsePageAsync(); }
     }
 
     private async void BrowseNext_Click(object sender, RoutedEventArgs e)
     {
-        if (_browsePage < _browseTotalPages)
-        {
-            _browsePage++;
-            await LoadBrowsePageAsync();
-        }
+        if (_browsePage < _browseTotalPages) { _browsePage++; await LoadBrowsePageAsync(); }
     }
 
-    private async void BrowseGrid_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private async void BrowseFilter_Click(object sender, RoutedEventArgs e)
+    {
+        _browseFilter = BrowseFilterBox.Text.Trim();
+        _browsePage = 1;
+        await LoadBrowsePageAsync();
+    }
+
+    private async void BrowseFilter_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter) { _browseFilter = BrowseFilterBox.Text.Trim(); _browsePage = 1; await LoadBrowsePageAsync(); }
+    }
+
+    private async void BrowseClearFilter_Click(object sender, RoutedEventArgs e)
+    {
+        _browseFilter = "";
+        BrowseFilterBox.Text = "";
+        _browsePage = 1;
+        await LoadBrowsePageAsync();
+    }
+
+    private async void BrowseGrid_DoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (BrowseGrid.SelectedItem is AssetDto asset)
         {
@@ -541,6 +550,84 @@ public partial class MainWindow : Window
         }
     }
 
+    // ── Settings (merged Account + Config + Algorithm Switch) ──
+
+    private async Task LoadSettingsAsync()
+    {
+        // Load account
+        var account = await _api.GetAccountAsync(_accountId);
+        if (account != null)
+        {
+            var trades = await _api.GetTradesAsync(_accountId);
+            AccountDetailText.Text =
+                $"Type: {account.Type} | Cash: ${account.Cash_Balance:N2} | Created: {account.Created_At} | Trades: {trades.Count}";
+        }
+        else
+        {
+            AccountDetailText.Text = "Could not load account.";
+        }
+
+        // Load config
+        var config = await _api.GetTradingConfigAsync();
+        if (config != null)
+        {
+            // Set combo to match active algorithm
+            foreach (ComboBoxItem item in AlgorithmCombo.Items)
+            {
+                if (item.Content.ToString() == config.Algorithm)
+                {
+                    AlgorithmCombo.SelectedItem = item;
+                    break;
+                }
+            }
+            BuyThresholdBox.Text = config.Buy_Threshold.ToString();
+            SellThresholdBox.Text = config.Sell_Threshold.ToString();
+            StopLossBox.Text = config.Stop_Loss.ToString();
+            MaxPositionBox.Text = config.Max_Position.ToString();
+        }
+    }
+
+    private async void SwitchAlgorithm_Click(object sender, RoutedEventArgs e)
+    {
+        if (AlgorithmCombo.SelectedItem is not ComboBoxItem selected) return;
+        var algo = selected.Content.ToString() ?? "cs";
+
+        SwitchAlgoBtn.IsEnabled = false;
+        var result = await _api.SwitchAlgorithmAsync(algo);
+        SwitchAlgoBtn.IsEnabled = true;
+
+        AlgoSwitchStatus.Text = result?.Active != null
+            ? $"Switched to: {result.Active}"
+            : result?.Error ?? "Switch failed";
+    }
+
+    private async void SaveConfig_Click(object sender, RoutedEventArgs e)
+    {
+        if (!double.TryParse(BuyThresholdBox.Text, out var buy) ||
+            !double.TryParse(SellThresholdBox.Text, out var sell) ||
+            !double.TryParse(StopLossBox.Text, out var stop) ||
+            !int.TryParse(MaxPositionBox.Text, out var maxPos))
+        {
+            ConfigSaveStatus.Text = "Invalid values — enter numbers only.";
+            return;
+        }
+
+        SaveConfigBtn.IsEnabled = false;
+        var result = await _api.UpdateTradingConfigAsync(buy, sell, stop, maxPos);
+        SaveConfigBtn.IsEnabled = true;
+
+        ConfigSaveStatus.Text = result != null ? "Config saved." : "Save failed — is the API running?";
+    }
+
+    private async void AccountId_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (int.TryParse(AccountIdBox.Text.Trim(), out int id) && id > 0)
+        {
+            _accountId = id;
+            await RefreshAccountInfoAsync();
+        }
+    }
+
     // ── Theme Toggle ──
 
     private void ThemeToggle_Click(object sender, RoutedEventArgs e)
@@ -552,10 +639,8 @@ public partial class MainWindow : Window
         Application.Current.Resources.MergedDictionaries.Clear();
         Application.Current.Resources.MergedDictionaries.Add(newTheme);
 
-        // Update toggle button icon and window background
         ThemeToggleBtn.Content = _isDarkTheme ? "\u2600" : "\u263D";
 
-        // Refresh window background gradient (DynamicResource on GradientStop.Color needs manual refresh)
         var bg = new LinearGradientBrush
         {
             StartPoint = new Point(0.5, 0),
@@ -565,16 +650,24 @@ public partial class MainWindow : Window
         bg.GradientStops.Add(new GradientStop((Color)FindResource("BgGradientBottom"), 1));
         Background = bg;
 
-        // Refresh chart if visible
         if (_selectedAssetId > 0 && ChartPanel.Visibility == Visibility.Visible)
             NavChart_Click(sender, e);
+    }
+
+    // ── Manual Refresh ──
+
+    private async void ManualRefresh_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshBtn.IsEnabled = false;
+        await AutoRefreshAsync();
+        RefreshBtn.IsEnabled = true;
     }
 
     // ── Helpers ──
 
     private async Task RefreshAccountInfoAsync()
     {
-        var account = await _api.GetAccountAsync(DefaultAccountId);
+        var account = await _api.GetAccountAsync(_accountId);
         AccountCashText.Text = account != null ? $"${account.Cash_Balance:N2}" : "--";
     }
 }

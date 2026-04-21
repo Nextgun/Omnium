@@ -3,39 +3,39 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Icon="logo.ico"
         Title="Omnium — Login"
-        Height="500" Width="420"
+        Height="560" Width="420"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
 
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FF202020" Offset="1"/>
-            <GradientStop Color="#FF1A203A" Offset="0"/>
+            <GradientStop Color="{DynamicResource BgGradientBottom}" Offset="1"/>
+            <GradientStop Color="{DynamicResource BgGradientTop}" Offset="0"/>
         </LinearGradientBrush>
     </Window.Background>
 
     <Grid Margin="40">
         <StackPanel VerticalAlignment="Center">
             <!-- Title -->
-            <TextBlock Text="OMNIUM" Foreground="#E6EAF2" FontSize="28" FontWeight="Bold"
+            <TextBlock Text="OMNIUM" Foreground="{DynamicResource TextTitle}" FontSize="28" FontWeight="Bold"
                        HorizontalAlignment="Center" Margin="0,0,0,4"/>
-            <TextBlock Text="Trading Platform v0.1.0" Foreground="#8FA1C7" FontSize="13"
+            <TextBlock Text="Trading Platform v0.1.0" Foreground="{DynamicResource TextMuted}" FontSize="13"
                        HorizontalAlignment="Center" Margin="0,0,0,30"/>
 
             <!-- Tab toggle -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
                 <RadioButton x:Name="LoginTab" Content="Login" IsChecked="True"
-                             Foreground="White" FontSize="14" Margin="0,0,20,0"
+                             Foreground="{DynamicResource TextPrimary}" FontSize="14" Margin="0,0,20,0"
                              Checked="Tab_Changed"/>
                 <RadioButton x:Name="RegisterTab" Content="Register"
-                             Foreground="White" FontSize="14"
+                             Foreground="{DynamicResource TextPrimary}" FontSize="14"
                              Checked="Tab_Changed"/>
             </StackPanel>
 
             <!-- Username -->
-            <TextBlock Text="Username" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,4"/>
-            <TextBox x:Name="UsernameBox" Height="36" Background="#FF2F3545" Foreground="White"
-                     BorderBrush="#FF3C445A" Padding="10,6" FontSize="14"
+            <TextBlock Text="Username" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,4"/>
+            <TextBox x:Name="UsernameBox" Height="36" Background="{DynamicResource InputBg}" Foreground="{DynamicResource InputFg}"
+                     BorderBrush="{DynamicResource InputBorder}" Padding="10,6" FontSize="14"
                      VerticalContentAlignment="Center" Margin="0,0,0,14">
                 <TextBox.Resources>
                     <Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style>
@@ -43,9 +43,9 @@
             </TextBox>
 
             <!-- Password -->
-            <TextBlock Text="Password" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,4"/>
-            <PasswordBox x:Name="PasswordBox" Height="36" Background="#FF2F3545" Foreground="White"
-                         BorderBrush="#FF3C445A" Padding="10,6" FontSize="14"
+            <TextBlock Text="Password" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,4"/>
+            <PasswordBox x:Name="PasswordBox" Height="36" Background="{DynamicResource InputBg}" Foreground="{DynamicResource InputFg}"
+                         BorderBrush="{DynamicResource InputBorder}" Padding="10,6" FontSize="14"
                          VerticalContentAlignment="Center" Margin="0,0,0,6"
                          KeyDown="PasswordBox_KeyDown">
                 <PasswordBox.Resources>
@@ -55,8 +55,48 @@
 
             <!-- Password hint (register only) -->
             <TextBlock x:Name="PasswordHint" Text="Min 6 chars, 1 uppercase, 1 digit"
-                       Foreground="#6B7280" FontSize="11" Margin="0,0,0,20"
+                       Foreground="{DynamicResource TextStatusBar}" FontSize="11" Margin="0,0,0,6"
                        Visibility="Collapsed"/>
+
+            <!-- Email (register only) -->
+            <StackPanel x:Name="EmailPanel" Visibility="Collapsed" Margin="0,0,0,14">
+                <TextBlock Text="Email (optional — for verification)" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,4"/>
+                <TextBox x:Name="EmailBox" Height="36" Background="{DynamicResource InputBg}" Foreground="{DynamicResource InputFg}"
+                         BorderBrush="{DynamicResource InputBorder}" Padding="10,6" FontSize="14"
+                         VerticalContentAlignment="Center">
+                    <TextBox.Resources>
+                        <Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style>
+                    </TextBox.Resources>
+                </TextBox>
+            </StackPanel>
+
+            <!-- Email verification (post-register) -->
+            <StackPanel x:Name="VerifyPanel" Visibility="Collapsed" Margin="0,0,0,14">
+                <TextBlock Text="Enter verification code sent to your email:" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,4"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox x:Name="VerifyCodeBox" Width="120" Height="36" Background="{DynamicResource InputBg}" Foreground="{DynamicResource InputFg}"
+                             BorderBrush="{DynamicResource InputBorder}" Padding="10,6" FontSize="14" VerticalContentAlignment="Center">
+                        <TextBox.Resources>
+                            <Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style>
+                        </TextBox.Resources>
+                    </TextBox>
+                    <Button x:Name="VerifyBtn" Content="Verify" Height="36" Padding="14,0" Margin="8,0,0,0"
+                            Foreground="White" FontSize="13" FontWeight="SemiBold" Cursor="Hand" Click="Verify_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="{DynamicResource ActionBtnBg}" CornerRadius="6" Padding="14,0">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource ActionBtnHover}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
 
             <!-- Submit button -->
             <Button x:Name="SubmitButton" Content="Login" Height="38" FontSize="14"
@@ -64,15 +104,15 @@
                     Click="Submit_Click">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bg" Background="#1E3A8A" CornerRadius="6">
+                        <Border x:Name="Bg" Background="{DynamicResource ActionBtnBg}" CornerRadius="6">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#2563EB"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource ActionBtnHover}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#1D4ED8"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource ActionBtnPressed}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -80,12 +120,12 @@
             </Button>
 
             <!-- Status message -->
-            <TextBlock x:Name="StatusMessage" Text="" Foreground="#EF4444" FontSize="12"
+            <TextBlock x:Name="StatusMessage" Text="" Foreground="{DynamicResource AccentRed}" FontSize="12"
                        HorizontalAlignment="Center" Margin="0,14,0,0" TextWrapping="Wrap"/>
 
             <!-- Team credit -->
             <TextBlock Text="QuantumShell — TAMUCC COSC 3370"
-                       Foreground="#4B5563" FontSize="11"
+                       Foreground="{DynamicResource TextVersion}" FontSize="11"
                        HorizontalAlignment="Center" Margin="0,30,0,0"/>
         </StackPanel>
     </Grid>

@@ -16,6 +16,8 @@ run this once to set up your database for development:
 safe to re-run; it will clear any existing data in it first
 """
 
+from __future__ import annotations
+
 import random
 from datetime import datetime, timedelta
 import yfinance as yf

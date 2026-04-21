@@ -5,6 +5,8 @@ Original code by teammate on branch 9-implement-rule-based-trading-algorithm-cs-
 integrated into src/omnium/algorithms/ package.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 

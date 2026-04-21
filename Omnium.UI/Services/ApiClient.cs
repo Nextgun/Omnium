@@ -164,6 +164,30 @@ public class ApiClient
         catch { return null; }
     }
 
+    // ── Trading Config & Switch ──
+
+    public async Task<TradingConfigDto?> UpdateTradingConfigAsync(double buyThreshold, double sellThreshold, double stopLoss, int maxPosition)
+    {
+        try
+        {
+            var resp = await _http.PostAsJsonAsync("/trading/config",
+                new { buy_threshold = buyThreshold, sell_threshold = sellThreshold, stop_loss = stopLoss, max_position = maxPosition });
+            return await resp.Content.ReadFromJsonAsync<TradingConfigDto>(JsonOpts);
+        }
+        catch { return null; }
+    }
+
+    public async Task<SwitchResultDto?> SwitchAlgorithmAsync(string algorithm)
+    {
+        try
+        {
+            var resp = await _http.PostAsJsonAsync("/trading/switch",
+                new { algorithm });
+            return await resp.Content.ReadFromJsonAsync<SwitchResultDto>(JsonOpts);
+        }
+        catch { return null; }
+    }
+
     // ── Backtest ──
 
     public async Task<BacktestResultDto?> RunBacktestAsync(int assetId, int limit = 90)
@@ -239,3 +263,4 @@ public record TradingStatusDto(int Account_Id, int Asset_Id, string Symbol, doub
 public record TradingConfigDto(string Algorithm, double Buy_Threshold, double Sell_Threshold, double Stop_Loss, int Max_Position);
 public record BacktestResultDto(int Asset_Id, string Symbol, string Algorithm, double Starting_Cash, double Ending_Cash, int Shares_Held, double Total_Value, double Return_Pct, int Total_Trades, int Buys, int Sells);
 public record PaginatedAssetsDto(List<AssetDto> Assets, int Page, int Per_Page, int Total, int Total_Pages);
+public record SwitchResultDto(string? Active, string? Error);
