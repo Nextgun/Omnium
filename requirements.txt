@@ -5,7 +5,7 @@
 
 # ── Core ──
 flask>=3.0                  # REST API framework
-mariadb>=1.1                # MariaDB connector (requires MariaDB C connector)
+pymysql>=1.1                # MariaDB/MySQL connector (pure Python, no C deps)
 python-dotenv>=1.0          # Load .env files for local config
 
 # ── Data & ML ──

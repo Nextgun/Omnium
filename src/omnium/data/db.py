@@ -8,12 +8,11 @@ date last modified: 3/6/2026
 All SQL lives here. 
 Other modules calls these functions and gets back plain Python dicts.
 
-Install the driver once with:  pip install mariadb
+Install the driver once with:  pip install pymysql
 """
 
 import os
-import mariadb
-import mariadb.connectionpool
+import pymysql
 import sys
 from datetime import datetime
 from functools import lru_cache
@@ -32,34 +31,14 @@ DB_CONFIG = {
     "database": os.getenv("OMNIUM_DB_NAME", "omnium_database"),
 }
 
-# Connection pool — reuses connections instead of opening/closing each request.
-_pool = None
-
-
-def _get_pool():
-    """returns the shared connection pool, creating it on first call."""
-    global _pool
-    if _pool is None:
-        try:
-            _pool = mariadb.connectionpool.ConnectionPool(
-                pool_name="omnium_pool",
-                pool_size=5,
-                **DB_CONFIG,
-            )
-        except mariadb.Error as e:
-            print(f"[db] Pool creation error: {e}")
-            sys.exit(1)
-    return _pool
-
-
 def _get_connection():
     """
-    internal helper used to get a MariaDB connection from the pool.
+    internal helper used to get a MariaDB connection via pymysql.
     Prefixed with _ so don't call this function directly.
     """
     try:
-        return _get_pool().get_connection()
-    except mariadb.Error as e:
+        return pymysql.connect(**DB_CONFIG)
+    except pymysql.Error as e:
         print(f"[db] Connection error: {e}")
         sys.exit(1)
 
@@ -94,7 +73,7 @@ def insert_asset(symbol: str, name: str) -> int:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO assets (symbol, name) VALUES (?, ?)",
+            "INSERT INTO assets (symbol, name) VALUES (%s, %s)",
             (symbol, name)
         )
         conn.commit()
@@ -111,7 +90,7 @@ def insert_price(asset_id: int, timestamp: datetime, open: float,
     try:
         cursor.execute(
             """INSERT INTO prices (asset_id, timestamp, open, high, low, close, volume)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
             (asset_id, timestamp, open, high, low, close, volume)
         )
         conn.commit()
@@ -126,7 +105,7 @@ def insert_account(account_type: str, cash_balance: float) -> int:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO accounts (type, cash_balance) VALUES (?, ?)",
+            "INSERT INTO accounts (type, cash_balance) VALUES (%s, %s)",
             (account_type, cash_balance)
         )
         conn.commit()
@@ -143,7 +122,7 @@ def insert_trade(account_id: int, asset_id: int, side: str,
     try:
         cursor.execute(
             """INSERT INTO trades (account_id, asset_id, side, quantity, price, timestamp)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+               VALUES (%s, %s, %s, %s, %s, %s)""",
             (account_id, asset_id, side, quantity, price, timestamp)
         )
         conn.commit()
@@ -165,7 +144,7 @@ def search_assets(query: str) -> list[dict]:
         like_query = f"%{query}%"
         cursor.execute(
             """SELECT id, symbol, name FROM assets
-               WHERE symbol LIKE ? OR name LIKE ?
+               WHERE symbol LIKE %s OR name LIKE %s
                ORDER BY symbol
                LIMIT 20""",
             (like_query, like_query)
@@ -187,7 +166,7 @@ def get_asset_by_symbol(symbol: str) -> dict | None:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT id, symbol, name FROM assets WHERE symbol = ?",
+            "SELECT id, symbol, name FROM assets WHERE symbol = %s",
             (symbol,)
         )
         row = cursor.fetchone()
@@ -208,7 +187,7 @@ def get_asset_by_id(asset_id: int) -> dict | None:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT id, symbol, name FROM assets WHERE id = ?",
+            "SELECT id, symbol, name FROM assets WHERE id = %s",
             (asset_id,)
         )
         row = cursor.fetchone()
@@ -233,7 +212,7 @@ def get_assets_paginated(page: int = 1, per_page: int = 10) -> dict:
 
         offset = (page - 1) * per_page
         cursor.execute(
-            "SELECT id, symbol, name FROM assets ORDER BY symbol LIMIT ? OFFSET ?",
+            "SELECT id, symbol, name FROM assets ORDER BY symbol LIMIT %s OFFSET %s",
             (per_page, offset)
         )
         assets = [_row_to_dict(cursor, row) for row in cursor.fetchall()]
@@ -291,7 +270,7 @@ def get_latest_price(asset_id: int) -> dict | None:
         cursor.execute(
             """SELECT id, asset_id, timestamp, open, high, low, close, volume
                FROM prices
-               WHERE asset_id = ?
+               WHERE asset_id = %s
                ORDER BY timestamp DESC
                LIMIT 1""",
             (asset_id,)
@@ -316,9 +295,9 @@ def get_price_history(asset_id: int, limit: int = 30) -> list[dict]:
         cursor.execute(
             """SELECT id, asset_id, timestamp, open, high, low, close, volume
                FROM prices
-               WHERE asset_id = ?
+               WHERE asset_id = %s
                ORDER BY timestamp DESC
-               LIMIT ?""",
+               LIMIT %s""",
             (asset_id, limit)
         )
         return [_row_to_dict(cursor, row) for row in cursor.fetchall()]
@@ -339,7 +318,7 @@ def get_account(account_id: int) -> dict | None:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT id, type, cash_balance, created_at FROM accounts WHERE id = ?",
+            "SELECT id, type, cash_balance, created_at FROM accounts WHERE id = %s",
             (account_id,)
         )
         row = cursor.fetchone()
@@ -360,7 +339,7 @@ def update_cash_balance(account_id: int, new_balance: float) -> bool:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE accounts SET cash_balance = ? WHERE id = ?",
+            "UPDATE accounts SET cash_balance = %s WHERE id = %s",
             (new_balance, account_id)
         )
         conn.commit()
@@ -386,7 +365,7 @@ def log_trade(account_id: int, asset_id: int, side: str,
     try:
         cursor.execute(
             """INSERT INTO trades (account_id, asset_id, side, quantity, price, timestamp)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+               VALUES (%s, %s, %s, %s, %s, %s)""",
             (account_id, asset_id, side.upper(), quantity, price, datetime.now())
         )
         conn.commit()
@@ -410,7 +389,7 @@ def get_trades(account_id: int) -> list[dict]:
         cursor.execute(
             """SELECT id, account_id, asset_id, side, quantity, price, timestamp
                FROM trades
-               WHERE account_id = ?
+               WHERE account_id = %s
                ORDER BY timestamp DESC""",
             (account_id,)
         )
@@ -433,7 +412,7 @@ def get_trades_for_asset(account_id: int, asset_id: int) -> list[dict]:
         cursor.execute(
             """SELECT id, account_id, asset_id, side, quantity, price, timestamp
                FROM trades
-               WHERE account_id = ? AND asset_id = ?
+               WHERE account_id = %s AND asset_id = %s
                ORDER BY timestamp DESC""",
             (account_id, asset_id)
         )
@@ -458,7 +437,7 @@ def get_position(account_id: int, asset_id: int) -> int:
                    SUM(CASE WHEN side = 'BUY'  THEN quantity ELSE 0 END) -
                    SUM(CASE WHEN side = 'SELL' THEN quantity ELSE 0 END) AS net_shares
                FROM trades
-               WHERE account_id = ? AND asset_id = ?""",
+               WHERE account_id = %s AND asset_id = %s""",
             (account_id, asset_id)
         )
         row = cursor.fetchone()
@@ -510,7 +489,7 @@ def create_user(username: str, display_name: str, password_hash: str) -> bool:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO users (username, display_name, password) VALUES (?, ?, ?)",
+            "INSERT INTO users (username, display_name, password) VALUES (%s, %s, %s)",
             (username.lower(), display_name, password_hash)
         )
         conn.commit()
@@ -531,7 +510,7 @@ def get_user(username: str) -> dict | None:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT username, display_name, password FROM users WHERE username = ?",
+            "SELECT username, display_name, password FROM users WHERE username = %s",
             (username.lower(),)
         )
         row = cursor.fetchone()
@@ -554,7 +533,7 @@ def initialize_user_lockout(username: str) -> None:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT IGNORE INTO lockouts (username, failed_attempts, lockout_until) VALUES (?, 0, NULL)",
+            "INSERT IGNORE INTO lockouts (username, failed_attempts, lockout_until) VALUES (%s, 0, NULL)",
             (username.lower(),)
         )
         conn.commit()
@@ -573,7 +552,7 @@ def get_lockout(username: str) -> dict | None:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT username, failed_attempts, lockout_until FROM lockouts WHERE username = ?",
+            "SELECT username, failed_attempts, lockout_until FROM lockouts WHERE username = %s",
             (username.lower(),)
         )
         row = cursor.fetchone()
@@ -596,8 +575,8 @@ def increment_failed_attempt(username: str, lockout_until: datetime | None = Non
         cursor.execute(
             """UPDATE lockouts
                SET failed_attempts = failed_attempts + 1,
-                   lockout_until   = ?
-               WHERE username = ?""",
+                   lockout_until   = %s
+               WHERE username = %s""",
             (lockout_until, username.lower())
         )
         conn.commit()
@@ -616,7 +595,7 @@ def reset_lockout(username: str) -> None:
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE lockouts SET failed_attempts = 0, lockout_until = NULL WHERE username = ?",
+            "UPDATE lockouts SET failed_attempts = 0, lockout_until = NULL WHERE username = %s",
             (username.lower(),)
         )
         conn.commit()
