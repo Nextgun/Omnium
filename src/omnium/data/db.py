@@ -13,8 +13,10 @@ Install the driver once with:  pip install mariadb
 
 import os
 import mariadb
+import mariadb.connectionpool
 import sys
 from datetime import datetime
+from functools import lru_cache
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,14 +32,33 @@ DB_CONFIG = {
     "database": os.getenv("OMNIUM_DB_NAME", "omnium_database"),
 }
 
+# Connection pool — reuses connections instead of opening/closing each request.
+_pool = None
+
+
+def _get_pool():
+    """returns the shared connection pool, creating it on first call."""
+    global _pool
+    if _pool is None:
+        try:
+            _pool = mariadb.connectionpool.ConnectionPool(
+                pool_name="omnium_pool",
+                pool_size=5,
+                **DB_CONFIG,
+            )
+        except mariadb.Error as e:
+            print(f"[db] Pool creation error: {e}")
+            sys.exit(1)
+    return _pool
+
 
 def _get_connection():
     """
-    internal helper used to open a MariaDB connection.
+    internal helper used to get a MariaDB connection from the pool.
     Prefixed with _ so don't call this function directly.
     """
     try:
-        return mariadb.connect(**DB_CONFIG)
+        return _get_pool().get_connection()
     except mariadb.Error as e:
         print(f"[db] Connection error: {e}")
         sys.exit(1)
@@ -230,6 +251,31 @@ def get_assets_paginated(page: int = 1, per_page: int = 10) -> dict:
         return {"assets": [], "page": page, "per_page": per_page, "total": 0, "total_pages": 0}
     finally:
         conn.close()
+
+
+# cached queries =============================================================
+
+@lru_cache(maxsize=1)
+def get_all_assets_cached() -> tuple[dict, ...]:
+    """
+    returns all assets as a tuple of dicts (cached after first call).
+    Call invalidate_asset_cache() after inserting new assets.
+    """
+    conn = _get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT id, symbol, name FROM assets ORDER BY symbol")
+        return tuple(_row_to_dict(cursor, row) for row in cursor.fetchall())
+    except Exception as e:
+        print(f"[db] get_all_assets_cached error: {e}")
+        return ()
+    finally:
+        conn.close()
+
+
+def invalidate_asset_cache() -> None:
+    """clears the cached asset list. Call after seeding or inserting assets."""
+    get_all_assets_cached.cache_clear()
 
 
 # prices =================================================================

@@ -34,3 +34,8 @@ CREATE TABLE IF NOT EXISTS trades (
     FOREIGN KEY (account_id) REFERENCES accounts(id),
     FOREIGN KEY (asset_id)   REFERENCES assets(id)
 );
+
+-- Performance indexes
+CREATE INDEX IF NOT EXISTS idx_assets_symbol ON assets(symbol);
+CREATE INDEX IF NOT EXISTS idx_prices_asset_timestamp ON prices(asset_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_trades_account_asset ON trades(account_id, asset_id);
