@@ -1,6 +1,7 @@
 <Window x:Class="Omnium.UI.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="logo.ico"
         Title="Omnium — Login"
         Height="500" Width="420"
         WindowStartupLocation="CenterScreen"
