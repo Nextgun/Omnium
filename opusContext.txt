@@ -1,7 +1,0 @@
--Repo uses src layout: src/omnium/ is the package, devtools/ is separate
--Single conda env: omnium-dev
--Entry point: setup_dev.py at repo root
--Pre-commit: PlantUML render + ruff linting
--CI: GitHub Actions → lint → test + coverage → benchmarks → SonarQube on Bane
--83 tests passing, 22 benchmarks, ruff clean
--All module stubs have interfaces defined, orchestration is implemented
