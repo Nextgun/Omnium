@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     private System.Windows.Threading.DispatcherTimer? _refreshTimer;
     private int _browsePage = 1;
     private int _browseTotalPages = 1;
+    private bool _isDarkTheme = true;
 
     public string LoggedInUser { get; set; } = "";
 
@@ -422,22 +423,30 @@ public partial class MainWindow : Window
         // History is newest-first; reverse for chronological plot
         history.Reverse();
 
+        // Theme-aware chart colors
+        var cardBg = ((SolidColorBrush)FindResource("CardBg")).Color;
+        var borderColor = ((SolidColorBrush)FindResource("CardBorder")).Color;
+        var textColor = ((SolidColorBrush)FindResource("TextSecondary")).Color;
+        var mutedColor = ((SolidColorBrush)FindResource("TextMuted")).Color;
+        var accentColor = ((SolidColorBrush)FindResource("AccentBlue")).Color;
+        var gridAlpha = _isDarkTheme ? (byte)40 : (byte)60;
+
         var model = new PlotModel
         {
-            Background = OxyColor.FromRgb(0x2F, 0x35, 0x45),
-            PlotAreaBorderColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
-            TextColor = OxyColor.FromRgb(0xC9, 0xD1, 0xE8),
+            Background = OxyColor.FromRgb(cardBg.R, cardBg.G, cardBg.B),
+            PlotAreaBorderColor = OxyColor.FromRgb(borderColor.R, borderColor.G, borderColor.B),
+            TextColor = OxyColor.FromRgb(textColor.R, textColor.G, textColor.B),
         };
 
         var dateAxis = new DateTimeAxis
         {
             Position = AxisPosition.Bottom,
             StringFormat = "MM/dd",
-            AxislineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
-            TicklineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
-            TextColor = OxyColor.FromRgb(0x8F, 0xA1, 0xC7),
+            AxislineColor = OxyColor.FromRgb(borderColor.R, borderColor.G, borderColor.B),
+            TicklineColor = OxyColor.FromRgb(borderColor.R, borderColor.G, borderColor.B),
+            TextColor = OxyColor.FromRgb(mutedColor.R, mutedColor.G, mutedColor.B),
             MajorGridlineStyle = LineStyle.Dot,
-            MajorGridlineColor = OxyColor.FromArgb(40, 255, 255, 255),
+            MajorGridlineColor = OxyColor.FromArgb(gridAlpha, borderColor.R, borderColor.G, borderColor.B),
         };
         model.Axes.Add(dateAxis);
 
@@ -445,21 +454,21 @@ public partial class MainWindow : Window
         {
             Position = AxisPosition.Left,
             StringFormat = "$0.00",
-            AxislineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
-            TicklineColor = OxyColor.FromRgb(0x3C, 0x44, 0x5A),
-            TextColor = OxyColor.FromRgb(0x8F, 0xA1, 0xC7),
+            AxislineColor = OxyColor.FromRgb(borderColor.R, borderColor.G, borderColor.B),
+            TicklineColor = OxyColor.FromRgb(borderColor.R, borderColor.G, borderColor.B),
+            TextColor = OxyColor.FromRgb(mutedColor.R, mutedColor.G, mutedColor.B),
             MajorGridlineStyle = LineStyle.Dot,
-            MajorGridlineColor = OxyColor.FromArgb(40, 255, 255, 255),
+            MajorGridlineColor = OxyColor.FromArgb(gridAlpha, borderColor.R, borderColor.G, borderColor.B),
         };
         model.Axes.Add(valueAxis);
 
         var series = new LineSeries
         {
-            Color = OxyColor.FromRgb(0x60, 0xA5, 0xFA),
+            Color = OxyColor.FromRgb(accentColor.R, accentColor.G, accentColor.B),
             StrokeThickness = 2,
             MarkerType = MarkerType.Circle,
             MarkerSize = 3,
-            MarkerFill = OxyColor.FromRgb(0x60, 0xA5, 0xFA),
+            MarkerFill = OxyColor.FromRgb(accentColor.R, accentColor.G, accentColor.B),
         };
 
         foreach (var p in history)
@@ -530,6 +539,35 @@ public partial class MainWindow : Window
 
             ShowPanel("dashboard");
         }
+    }
+
+    // ── Theme Toggle ──
+
+    private void ThemeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        _isDarkTheme = !_isDarkTheme;
+        var themePath = _isDarkTheme ? "Themes/DarkTheme.xaml" : "Themes/LightTheme.xaml";
+        var newTheme = new ResourceDictionary { Source = new Uri(themePath, UriKind.Relative) };
+
+        Application.Current.Resources.MergedDictionaries.Clear();
+        Application.Current.Resources.MergedDictionaries.Add(newTheme);
+
+        // Update toggle button icon and window background
+        ThemeToggleBtn.Content = _isDarkTheme ? "\u2600" : "\u263D";
+
+        // Refresh window background gradient (DynamicResource on GradientStop.Color needs manual refresh)
+        var bg = new LinearGradientBrush
+        {
+            StartPoint = new Point(0.5, 0),
+            EndPoint = new Point(0.5, 1)
+        };
+        bg.GradientStops.Add(new GradientStop((Color)FindResource("BgGradientTop"), 0));
+        bg.GradientStops.Add(new GradientStop((Color)FindResource("BgGradientBottom"), 1));
+        Background = bg;
+
+        // Refresh chart if visible
+        if (_selectedAssetId > 0 && ChartPanel.Visibility == Visibility.Visible)
+            NavChart_Click(sender, e);
     }
 
     // ── Helpers ──

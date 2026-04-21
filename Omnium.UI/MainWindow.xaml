@@ -20,8 +20,8 @@
 
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FF202020" Offset="1"/>
-            <GradientStop Color="#FF1A203A" Offset="0"/>
+            <GradientStop Color="{DynamicResource BgGradientBottom}" Offset="1"/>
+            <GradientStop Color="{DynamicResource BgGradientTop}" Offset="0"/>
         </LinearGradientBrush>
     </Window.Background>
 
@@ -30,7 +30,7 @@
         <Style x:Key="SidebarButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="38"/>
             <Setter Property="Margin" Value="0,4"/>
-            <Setter Property="Foreground" Value="#E6EAF2"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextTitle}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Padding" Value="14,0"/>
@@ -38,17 +38,17 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Border" Background="#FF2F3545" BorderBrush="#FF3C445A"
+                        <Border x:Name="Border" Background="{DynamicResource SidebarBtnBg}" BorderBrush="{DynamicResource SidebarBtnBorder}"
                                 BorderThickness="1" CornerRadius="8">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#FF384058"/>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource SidebarBtnHover}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#FF242B3C"/>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource SidebarBtnPressed}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -64,7 +64,7 @@
             <Setter Property="Padding" Value="18,0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="#C9D1E8"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextNavTab}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -74,15 +74,15 @@
                         <Grid>
                             <Border x:Name="Bg" Background="Transparent"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <Border Width="1" HorizontalAlignment="Right" Background="#22FFFFFF"/>
+                            <Border Width="1" HorizontalAlignment="Right" Background="{DynamicResource NavTabDivider}"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#22FFFFFF"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource NavTabHover}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#33FFFFFF"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource NavTabPressed}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -92,8 +92,8 @@
 
         <!-- Panel card style -->
         <Style x:Key="PanelCard" TargetType="Border">
-            <Setter Property="Background" Value="#FF2F3545"/>
-            <Setter Property="BorderBrush" Value="#FF3C445A"/>
+            <Setter Property="Background" Value="{DynamicResource CardBg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="16"/>
@@ -110,15 +110,40 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Border" Background="#1E3A8A" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="Border" Background="{DynamicResource ActionBtnBg}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#2563EB"/>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ActionBtnHover}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#1D4ED8"/>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ActionBtnPressed}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Theme toggle button style -->
+        <Style x:Key="ThemeToggleStyle" TargetType="Button">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="ToolTip" Value="Toggle Light/Dark Mode"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" Background="Transparent" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource NavTabHover}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -140,10 +165,10 @@
         </Grid.ColumnDefinitions>
 
         <!-- ═══ ROW 0: TOP NAV BAR ═══ -->
-        <Border Grid.Row="0" Grid.ColumnSpan="2" BorderBrush="#2FFFFFFF" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" BorderBrush="{DynamicResource NavBarBorderBrush}" BorderThickness="0,0,0,1">
             <Grid>
                 <TextBlock Text="OMNIUM" Margin="18,0,0,0" VerticalAlignment="Center"
-                           Foreground="#E6EAF2" FontSize="16" FontWeight="SemiBold"/>
+                           Foreground="{DynamicResource TextTitle}" FontSize="16" FontWeight="SemiBold"/>
 
                 <StackPanel Orientation="Horizontal" Margin="220,0,0,0" VerticalAlignment="Stretch">
                     <Button Style="{StaticResource TopNavTabStyle}" Content="DASHBOARD" Click="NavDashboard_Click"/>
@@ -154,17 +179,19 @@
                     <Button Style="{StaticResource TopNavTabStyle}" Content="ACCOUNT" Click="NavAccount_Click"/>
                 </StackPanel>
 
-                <!-- User + Connection status -->
+                <!-- User + Connection status + Theme toggle -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0">
-                    <TextBlock x:Name="UserNameText" Text="" Foreground="#60A5FA" FontSize="12" Margin="0,0,16,0"/>
+                    <TextBlock x:Name="UserNameText" Text="" Foreground="{DynamicResource AccentBlue}" FontSize="12" Margin="0,0,16,0"/>
+                    <Button x:Name="ThemeToggleBtn" Content="&#x2600;" Style="{StaticResource ThemeToggleStyle}"
+                            Foreground="{DynamicResource TextTitle}" Click="ThemeToggle_Click" Margin="0,0,12,0"/>
                     <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#EF4444" Margin="0,0,6,0"/>
-                    <TextBlock x:Name="StatusText" Text="Disconnected" Foreground="#8FA1C7" FontSize="12"/>
+                    <TextBlock x:Name="StatusText" Text="Disconnected" Foreground="{DynamicResource TextMuted}" FontSize="12"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- ═══ ROW 1: SEARCH BAR ═══ -->
-        <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#FF1A1F2E" BorderBrush="#1FFFFFFF" BorderThickness="0,0,0,1">
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource SearchBarBg}" BorderBrush="{DynamicResource SearchBarBorderBrush}" BorderThickness="0,0,0,1">
             <Grid Margin="18,6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="400"/>
@@ -178,7 +205,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="SearchBox" Grid.Column="0" Height="30"
-                             Background="#FF2F3545" Foreground="White" BorderBrush="#FF3C445A"
+                             Background="{DynamicResource InputBg}" Foreground="{DynamicResource InputFg}" BorderBrush="{DynamicResource InputBorder}"
                              Padding="10,4" FontSize="13" VerticalContentAlignment="Center"
                              KeyDown="SearchBox_KeyDown">
                         <TextBox.Resources>
@@ -191,14 +218,14 @@
 
                 <!-- Account info -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <TextBlock Text="Account:" Foreground="#8FA1C7" FontSize="13" Margin="0,0,6,0"/>
-                    <TextBlock x:Name="AccountCashText" Text="--" Foreground="#10B981" FontSize="13" FontWeight="SemiBold"/>
+                    <TextBlock Text="Account:" Foreground="{DynamicResource TextMuted}" FontSize="13" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="AccountCashText" Text="--" Foreground="{DynamicResource AccentGreen}" FontSize="13" FontWeight="SemiBold"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- ═══ ROW 2: SIDEBAR ═══ -->
-        <Border Grid.Row="2" Grid.Column="0" BorderThickness="0,0,1,0" BorderBrush="#1FFFFFFF">
+        <Border Grid.Row="2" Grid.Column="0" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource SidebarBorderBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>  <!-- Search results -->
@@ -208,15 +235,15 @@
 
                 <!-- Search results list -->
                 <StackPanel Grid.Row="0" Margin="10,10,10,0">
-                    <TextBlock Text="SEARCH RESULTS" Foreground="#8FA1C7" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
+                    <TextBlock Text="SEARCH RESULTS" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
                     <ListBox x:Name="SearchResultsList" MaxHeight="200"
-                             Background="Transparent" BorderThickness="0" Foreground="White"
+                             Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimary}"
                              SelectionChanged="SearchResultsList_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="4,2">
-                                    <TextBlock Text="{Binding Symbol}" Foreground="#60A5FA" FontWeight="SemiBold" Width="60"/>
-                                    <TextBlock Text="{Binding Name}" Foreground="#C9D1E8"/>
+                                    <TextBlock Text="{Binding Symbol}" Foreground="{DynamicResource AccentBlue}" FontWeight="SemiBold" Width="60"/>
+                                    <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextSecondary}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -226,10 +253,10 @@
                                 <Setter Property="Padding" Value="4,2"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF384058"/>
+                                        <Setter Property="Background" Value="{DynamicResource ListItemHover}"/>
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="#1E3A8A"/>
+                                        <Setter Property="Background" Value="{DynamicResource ListItemSelected}"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -239,22 +266,22 @@
 
                 <!-- Sidebar actions -->
                 <StackPanel Grid.Row="1" Margin="10,14">
-                    <TextBlock Text="ACTIONS" Foreground="#8FA1C7" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📊 Dashboard" Click="NavDashboard_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📈 Trade Selected" Click="NavTrade_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="🔄 Run Backtest" Click="NavBacktest_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="⚖️ Compare Strategies" Click="NavEvaluate_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="💰 Account Details" Click="NavAccount_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="⚙️ Algorithm Config" Click="NavConfig_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📋 Portfolio" Click="NavPortfolio_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="📉 Price Chart" Click="NavChart_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="🗂️ Browse Stocks" Click="NavBrowse_Click"/>
-                    <Button Style="{StaticResource SidebarButtonStyle}" Content="ℹ️ About" Click="NavAbout_Click"/>
+                    <TextBlock Text="ACTIONS" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="4,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Dashboard" Click="NavDashboard_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Trade Selected" Click="NavTrade_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Run Backtest" Click="NavBacktest_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Compare Strategies" Click="NavEvaluate_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Account Details" Click="NavAccount_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Algorithm Config" Click="NavConfig_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Portfolio" Click="NavPortfolio_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Price Chart" Click="NavChart_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="Browse Stocks" Click="NavBrowse_Click"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="About" Click="NavAbout_Click"/>
                 </StackPanel>
 
                 <!-- Bottom status -->
                 <TextBlock Grid.Row="2" x:Name="SidebarStatus" Text="Ready"
-                           Margin="14,0,0,14" Foreground="#9AA6C1" FontSize="11"/>
+                           Margin="14,0,0,14" Foreground="{DynamicResource TextSubtle}" FontSize="11"/>
             </Grid>
         </Border>
 
@@ -270,7 +297,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Dashboard" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                <TextBlock Grid.Row="0" Text="Dashboard" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
@@ -285,12 +312,12 @@
                     <!-- Asset info card -->
                     <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PanelCard}" Margin="0,0,8,8">
                         <StackPanel>
-                            <TextBlock Text="Selected Asset" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="AssetSymbolText" Text="--" Foreground="White" FontSize="28" FontWeight="Bold"/>
-                            <TextBlock x:Name="AssetNameText" Text="Search for a stock to begin" Foreground="#9AA6C1" FontSize="13"/>
+                            <TextBlock Text="Selected Asset" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="AssetSymbolText" Text="--" Foreground="{DynamicResource TextPrimary}" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock x:Name="AssetNameText" Text="Search for a stock to begin" Foreground="{DynamicResource TextSubtle}" FontSize="13"/>
                             <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                <TextBlock Text="Price: " Foreground="#8FA1C7" FontSize="15"/>
-                                <TextBlock x:Name="AssetPriceText" Text="--" Foreground="#10B981" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Price: " Foreground="{DynamicResource TextMuted}" FontSize="15"/>
+                                <TextBlock x:Name="AssetPriceText" Text="--" Foreground="{DynamicResource AccentGreen}" FontSize="15" FontWeight="SemiBold"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -298,12 +325,12 @@
                     <!-- Trading signal card -->
                     <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource PanelCard}" Margin="8,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="Trading Signal" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="SignalText" Text="--" Foreground="White" FontSize="28" FontWeight="Bold"/>
-                            <TextBlock x:Name="SignalAlgoText" Text="No algorithm active" Foreground="#9AA6C1" FontSize="13"/>
+                            <TextBlock Text="Trading Signal" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="SignalText" Text="--" Foreground="{DynamicResource TextPrimary}" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock x:Name="SignalAlgoText" Text="No algorithm active" Foreground="{DynamicResource TextSubtle}" FontSize="13"/>
                             <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                <TextBlock Text="Shares held: " Foreground="#8FA1C7" FontSize="15"/>
-                                <TextBlock x:Name="SharesHeldText" Text="0" Foreground="White" FontSize="15"/>
+                                <TextBlock Text="Shares held: " Foreground="{DynamicResource TextMuted}" FontSize="15"/>
+                                <TextBlock x:Name="SharesHeldText" Text="0" Foreground="{DynamicResource TextPrimary}" FontSize="15"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -315,9 +342,9 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="Recent Prices" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock Grid.Row="0" Text="Recent Prices" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                             <ListBox Grid.Row="1" x:Name="PriceHistoryList" Background="Transparent"
-                                     BorderThickness="0" Foreground="White" FontSize="12">
+                                     BorderThickness="0" Foreground="{DynamicResource TextPrimary}" FontSize="12">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Margin="0,1">
@@ -328,11 +355,11 @@
                                                 <ColumnDefinition Width="70"/>
                                                 <ColumnDefinition Width="70"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Foreground="#9AA6C1"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Open, StringFormat='{}{0:F2}'}" Foreground="#C9D1E8"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding High, StringFormat='{}{0:F2}'}" Foreground="#10B981"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding Low, StringFormat='{}{0:F2}'}" Foreground="#EF4444"/>
-                                            <TextBlock Grid.Column="4" Text="{Binding Close, StringFormat='{}{0:F2}'}" Foreground="White" FontWeight="SemiBold"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Foreground="{DynamicResource TextSubtle}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Open, StringFormat='{}{0:F2}'}" Foreground="{DynamicResource TextSecondary}"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding High, StringFormat='{}{0:F2}'}" Foreground="{DynamicResource AccentGreen}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Low, StringFormat='{}{0:F2}'}" Foreground="{DynamicResource AccentRed}"/>
+                                            <TextBlock Grid.Column="4" Text="{Binding Close, StringFormat='{}{0:F2}'}" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -347,9 +374,9 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="Recent Trades" Foreground="#8FA1C7" FontSize="12" Margin="0,0,0,8"/>
+                            <TextBlock Grid.Row="0" Text="Recent Trades" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                             <ListBox Grid.Row="1" x:Name="TradeHistoryList" Background="Transparent"
-                                     BorderThickness="0" Foreground="White" FontSize="12">
+                                     BorderThickness="0" Foreground="{DynamicResource TextPrimary}" FontSize="12">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Margin="0,1">
@@ -365,18 +392,18 @@
                                                     <Style TargetType="TextBlock">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Side}" Value="BUY">
-                                                                <Setter Property="Foreground" Value="#10B981"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentGreen}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Side}" Value="SELL">
-                                                                <Setter Property="Foreground" Value="#EF4444"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                            <TextBlock Grid.Column="1" Text="{Binding Quantity}" Foreground="#C9D1E8"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding Price, StringFormat='${0:F2}'}" Foreground="White"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding Timestamp}" Foreground="#9AA6C1" FontSize="11"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Quantity}" Foreground="{DynamicResource TextSecondary}"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding Price, StringFormat='${0:F2}'}" Foreground="{DynamicResource TextPrimary}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Timestamp}" Foreground="{DynamicResource TextSubtle}" FontSize="11"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -389,11 +416,11 @@
             <!-- TRADE PANEL -->
             <Border x:Name="TradePanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
                 <StackPanel>
-                    <TextBlock Text="Execute Trade" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock x:Name="TradeAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <TextBlock Text="Execute Trade" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="TradeAssetLabel" Text="No asset selected" Foreground="{DynamicResource TextSubtle}" FontSize="15" Margin="0,0,0,14"/>
                     <Button Content="Run Algorithm Tick" Style="{StaticResource ActionButton}"
                             Width="200" HorizontalAlignment="Left" Click="RunTick_Click"/>
-                    <TextBlock x:Name="TradeResultText" Text="" Foreground="#10B981" FontSize="14"
+                    <TextBlock x:Name="TradeResultText" Text="" Foreground="{DynamicResource AccentGreen}" FontSize="14"
                                Margin="0,14,0,0" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
@@ -408,21 +435,21 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Backtest" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock Grid.Row="1" x:Name="BacktestAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="0" Text="Backtest" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="BacktestAssetLabel" Text="No asset selected" Foreground="{DynamicResource TextSubtle}" FontSize="15" Margin="0,0,0,14"/>
                     <Button Grid.Row="2" Content="Run Backtest (90 days)" Style="{StaticResource ActionButton}"
                             Width="220" HorizontalAlignment="Left" Click="RunBacktest_Click"/>
-                    <TextBlock Grid.Row="3" x:Name="BacktestResultText" Text="" Foreground="#C9D1E8" FontSize="13"
+                    <TextBlock Grid.Row="3" x:Name="BacktestResultText" Text="" Foreground="{DynamicResource TextSecondary}" FontSize="13"
                                Margin="0,14,0,14" TextWrapping="Wrap"/>
                     <DataGrid Grid.Row="4" x:Name="BacktestTradeGrid" AutoGenerateColumns="False"
-                              Background="Transparent" Foreground="White" BorderThickness="0"
+                              Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0"
                               HeadersVisibility="Column" IsReadOnly="True" GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#FF3C445A" RowBackground="#FF2F3545"
-                              AlternatingRowBackground="#FF262C3A" Visibility="Collapsed">
+                              HorizontalGridLinesBrush="{DynamicResource GridLineBrush}" RowBackground="{DynamicResource GridRowBg}"
+                              AlternatingRowBackground="{DynamicResource GridRowAltBg}" Visibility="Collapsed">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#FF1A1F2E"/>
-                                <Setter Property="Foreground" Value="#8FA1C7"/>
+                                <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource GridHeaderFg}"/>
                                 <Setter Property="Padding" Value="8,4"/>
                                 <Setter Property="FontSize" Value="12"/>
                             </Style>
@@ -448,21 +475,21 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Strategy Comparison" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock Grid.Row="1" x:Name="EvalAssetLabel" Text="No asset selected" Foreground="#9AA6C1" FontSize="15" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="0" Text="Strategy Comparison" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="EvalAssetLabel" Text="No asset selected" Foreground="{DynamicResource TextSubtle}" FontSize="15" Margin="0,0,0,14"/>
                     <Button Grid.Row="2" Content="Compare Strategies" Style="{StaticResource ActionButton}"
                             Width="200" HorizontalAlignment="Left" Click="RunEvaluate_Click"/>
-                    <TextBlock Grid.Row="3" x:Name="EvalSummaryText" Text="" Foreground="#10B981" FontSize="14"
+                    <TextBlock Grid.Row="3" x:Name="EvalSummaryText" Text="" Foreground="{DynamicResource AccentGreen}" FontSize="14"
                                Margin="0,14,0,10"/>
                     <DataGrid Grid.Row="4" x:Name="EvalResultGrid" AutoGenerateColumns="False"
-                              Background="Transparent" Foreground="White" BorderThickness="0"
+                              Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0"
                               HeadersVisibility="Column" IsReadOnly="True" GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#FF3C445A" RowBackground="#FF2F3545"
-                              AlternatingRowBackground="#FF262C3A" Visibility="Collapsed">
+                              HorizontalGridLinesBrush="{DynamicResource GridLineBrush}" RowBackground="{DynamicResource GridRowBg}"
+                              AlternatingRowBackground="{DynamicResource GridRowAltBg}" Visibility="Collapsed">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#FF1A1F2E"/>
-                                <Setter Property="Foreground" Value="#8FA1C7"/>
+                                <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource GridHeaderFg}"/>
                                 <Setter Property="Padding" Value="8,4"/>
                                 <Setter Property="FontSize" Value="12"/>
                             </Style>
@@ -482,16 +509,16 @@
             <!-- ACCOUNT PANEL -->
             <Border x:Name="AccountPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
                 <StackPanel>
-                    <TextBlock Text="Account Details" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock x:Name="AccountDetailText" Text="Loading..." Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock Text="Account Details" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="AccountDetailText" Text="Loading..." Foreground="{DynamicResource TextSecondary}" FontSize="14" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
 
             <!-- CONFIG PANEL -->
             <Border x:Name="ConfigPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
                 <StackPanel>
-                    <TextBlock Text="Algorithm Configuration" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock x:Name="ConfigDetailText" Text="Loading..." Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock Text="Algorithm Configuration" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock x:Name="ConfigDetailText" Text="Loading..." Foreground="{DynamicResource TextSecondary}" FontSize="14" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
 
@@ -503,10 +530,10 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Portfolio Overview" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock Grid.Row="1" x:Name="PortfolioSummaryText" Text="" Foreground="#10B981" FontSize="16" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="0" Text="Portfolio Overview" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="PortfolioSummaryText" Text="" Foreground="{DynamicResource AccentGreen}" FontSize="16" Margin="0,0,0,14"/>
                     <ListBox Grid.Row="2" x:Name="PortfolioList" Background="Transparent"
-                             BorderThickness="0" Foreground="White" FontSize="13">
+                             BorderThickness="0" Foreground="{DynamicResource TextPrimary}" FontSize="13">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="0,3">
@@ -516,10 +543,10 @@
                                         <ColumnDefinition Width="100"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding Symbol}" Foreground="#60A5FA" FontWeight="SemiBold"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Shares}" Foreground="#C9D1E8"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding Value}" Foreground="#10B981"/>
-                                    <TextBlock Grid.Column="3" Text="{Binding PnL}" Foreground="#9AA6C1"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Symbol}" Foreground="{DynamicResource AccentBlue}" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Shares}" Foreground="{DynamicResource TextSecondary}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Value}" Foreground="{DynamicResource AccentGreen}"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding PnL}" Foreground="{DynamicResource TextSubtle}"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -535,9 +562,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Price Chart" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <TextBlock Grid.Row="0" Text="Price Chart" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,8"/>
                     <TextBlock Grid.Row="1" x:Name="ChartAssetLabel" Text="Select an asset to view its price chart"
-                               Foreground="#9AA6C1" FontSize="14" Margin="0,0,0,10"/>
+                               Foreground="{DynamicResource TextSubtle}" FontSize="14" Margin="0,0,0,10"/>
                     <oxy:PlotView Grid.Row="2" x:Name="PriceChartView" MinHeight="400"
                                   Background="Transparent"/>
                 </Grid>
@@ -552,18 +579,18 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Browse Stocks" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock Grid.Row="1" x:Name="BrowsePageInfo" Text="Loading..." Foreground="#8FA1C7" FontSize="13" Margin="0,0,0,10"/>
+                    <TextBlock Grid.Row="0" Text="Browse Stocks" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Grid.Row="1" x:Name="BrowsePageInfo" Text="Loading..." Foreground="{DynamicResource TextMuted}" FontSize="13" Margin="0,0,0,10"/>
                     <DataGrid Grid.Row="2" x:Name="BrowseGrid" AutoGenerateColumns="False"
-                              Background="Transparent" Foreground="White" BorderThickness="0"
+                              Background="Transparent" Foreground="{DynamicResource TextPrimary}" BorderThickness="0"
                               HeadersVisibility="Column" IsReadOnly="True" GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#FF3C445A" RowBackground="#FF2F3545"
-                              AlternatingRowBackground="#FF262C3A" SelectionMode="Single"
+                              HorizontalGridLinesBrush="{DynamicResource GridLineBrush}" RowBackground="{DynamicResource GridRowBg}"
+                              AlternatingRowBackground="{DynamicResource GridRowAltBg}" SelectionMode="Single"
                               MouseDoubleClick="BrowseGrid_DoubleClick">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#FF1A1F2E"/>
-                                <Setter Property="Foreground" Value="#8FA1C7"/>
+                                <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource GridHeaderFg}"/>
                                 <Setter Property="Padding" Value="8,4"/>
                                 <Setter Property="FontSize" Value="13"/>
                             </Style>
@@ -573,7 +600,7 @@
                             <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="100">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#60A5FA"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource AccentBlue}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
@@ -584,7 +611,7 @@
                     <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
                         <Button Content="Previous" Style="{StaticResource ActionButton}" Width="100"
                                 Margin="0,0,10,0" Click="BrowsePrev_Click"/>
-                        <TextBlock x:Name="BrowsePageNum" Text="Page 1" Foreground="White" FontSize="14"
+                        <TextBlock x:Name="BrowsePageNum" Text="Page 1" Foreground="{DynamicResource TextPrimary}" FontSize="14"
                                    VerticalAlignment="Center" Margin="10,0"/>
                         <Button Content="Next" Style="{StaticResource ActionButton}" Width="100"
                                 Margin="10,0,0,0" Click="BrowseNext_Click"/>
@@ -596,8 +623,8 @@
             <Border x:Name="AboutPanel" Visibility="Collapsed" Style="{StaticResource PanelCard}">
                 <StackPanel>
                     <Image Source="logo.png" Width="80" Height="80" Margin="0,0,0,14" HorizontalAlignment="Left"/>
-                    <TextBlock Text="About Omnium" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
-                    <TextBlock Foreground="#C9D1E8" FontSize="14" TextWrapping="Wrap"
+                    <TextBlock Text="About Omnium" Foreground="{DynamicResource TextPrimary}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                    <TextBlock Foreground="{DynamicResource TextSecondary}" FontSize="14" TextWrapping="Wrap"
                                Text="Omnium v0.1.0 — Modular Day-Trading Platform&#x0a;&#x0a;Built by QuantumShell for COSC 3370 at TAMUCC.&#x0a;&#x0a;Features:&#x0a;  • Rule-based trading algorithm (mean reversion)&#x0a;  • ML trading algorithm (Linear Regression)&#x0a;  • Runtime algorithm switching&#x0a;  • Real-time market data from Yahoo Finance&#x0a;  • Paper trading with simulated accounts&#x0a;  • Backtesting engine for strategy validation&#x0a;  • Multi-strategy comparison and evaluation&#x0a;  • Interactive price charts (OxyPlot)&#x0a;  • Paginated stock browser&#x0a;  • Email verification for registration&#x0a;&#x0a;Architecture: WPF Desktop → Flask REST API → MariaDB&#x0a;&#x0a;Team: QuantumShell — TAMUCC COSC 3370"/>
                 </StackPanel>
             </Border>
@@ -605,10 +632,10 @@
         </Grid>
 
         <!-- ═══ ROW 3: STATUS BAR ═══ -->
-        <Border Grid.Row="3" Grid.ColumnSpan="2" Background="#FF161A26" BorderBrush="#1FFFFFFF" BorderThickness="0,1,0,0">
+        <Border Grid.Row="3" Grid.ColumnSpan="2" Background="{DynamicResource StatusBarBg}" BorderBrush="{DynamicResource StatusBarBorderBrush}" BorderThickness="0,1,0,0">
             <Grid Margin="14,0">
-                <TextBlock x:Name="StatusBarText" Text="Ready" Foreground="#6B7280" FontSize="11" VerticalAlignment="Center"/>
-                <TextBlock Text="Omnium v0.1.0" Foreground="#4B5563" FontSize="11"
+                <TextBlock x:Name="StatusBarText" Text="Ready" Foreground="{DynamicResource TextStatusBar}" FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="Omnium v0.1.0" Foreground="{DynamicResource TextVersion}" FontSize="11"
                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
             </Grid>
         </Border>

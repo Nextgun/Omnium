@@ -1,0 +1,59 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Window background gradient -->
+    <Color x:Key="BgGradientTop">#FFF0F2F5</Color>
+    <Color x:Key="BgGradientBottom">#FFFFFFFF</Color>
+
+    <!-- Surface colors -->
+    <SolidColorBrush x:Key="CardBg" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="CardBorder" Color="#FFD1D5DB"/>
+    <SolidColorBrush x:Key="SearchBarBg" Color="#FFF3F4F6"/>
+    <SolidColorBrush x:Key="StatusBarBg" Color="#FFE5E7EB"/>
+    <SolidColorBrush x:Key="SidebarBorderBrush" Color="#FFD1D5DB"/>
+    <SolidColorBrush x:Key="NavBarBorderBrush" Color="#FFD1D5DB"/>
+    <SolidColorBrush x:Key="SearchBarBorderBrush" Color="#FFE5E7EB"/>
+    <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#FFD1D5DB"/>
+
+    <!-- Button surfaces -->
+    <SolidColorBrush x:Key="SidebarBtnBg" Color="#FFF3F4F6"/>
+    <SolidColorBrush x:Key="SidebarBtnBorder" Color="#FFD1D5DB"/>
+    <SolidColorBrush x:Key="SidebarBtnHover" Color="#FFE5E7EB"/>
+    <SolidColorBrush x:Key="SidebarBtnPressed" Color="#FFD1D5DB"/>
+    <SolidColorBrush x:Key="ActionBtnBg" Color="#2563EB"/>
+    <SolidColorBrush x:Key="ActionBtnHover" Color="#1D4ED8"/>
+    <SolidColorBrush x:Key="ActionBtnPressed" Color="#1E3A8A"/>
+    <SolidColorBrush x:Key="NavTabDivider" Color="#22000000"/>
+    <SolidColorBrush x:Key="NavTabHover" Color="#11000000"/>
+    <SolidColorBrush x:Key="NavTabPressed" Color="#22000000"/>
+    <SolidColorBrush x:Key="ListItemHover" Color="#FFE5E7EB"/>
+    <SolidColorBrush x:Key="ListItemSelected" Color="#BFDBFE"/>
+
+    <!-- Text colors -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#FF111827"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#FF374151"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#FF6B7280"/>
+    <SolidColorBrush x:Key="TextSubtle" Color="#FF9CA3AF"/>
+    <SolidColorBrush x:Key="TextNavTab" Color="#FF374151"/>
+    <SolidColorBrush x:Key="TextTitle" Color="#FF111827"/>
+    <SolidColorBrush x:Key="TextStatusBar" Color="#FF6B7280"/>
+    <SolidColorBrush x:Key="TextVersion" Color="#FF9CA3AF"/>
+
+    <!-- Accent colors -->
+    <SolidColorBrush x:Key="AccentBlue" Color="#2563EB"/>
+    <SolidColorBrush x:Key="AccentGreen" Color="#059669"/>
+    <SolidColorBrush x:Key="AccentRed" Color="#DC2626"/>
+
+    <!-- DataGrid -->
+    <SolidColorBrush x:Key="GridHeaderBg" Color="#FFF3F4F6"/>
+    <SolidColorBrush x:Key="GridHeaderFg" Color="#FF6B7280"/>
+    <SolidColorBrush x:Key="GridLineBrush" Color="#FFE5E7EB"/>
+    <SolidColorBrush x:Key="GridRowBg" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="GridRowAltBg" Color="#FFF9FAFB"/>
+
+    <!-- Input -->
+    <SolidColorBrush x:Key="InputBg" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="InputBorder" Color="#FFD1D5DB"/>
+    <SolidColorBrush x:Key="InputFg" Color="#FF111827"/>
+
+</ResourceDictionary>
