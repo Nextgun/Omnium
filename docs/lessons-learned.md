@@ -53,17 +53,18 @@ a connection, it borrows one from the pool. When it's done, it returns it instea
 ```python
 # Before: new connection every call (~10-20ms overhead each time)
 def _get_connection():
-    return mariadb.connect(**DB_CONFIG)
+    return pymysql.connect(**DB_CONFIG)
 
-# After: borrow from pool (~0ms overhead)
-pool = mariadb.ConnectionPool(pool_name="omnium", pool_size=5, **DB_CONFIG)
+# After: borrow from pool (~0ms overhead, requires DBUtils or similar)
+from dbutils.pooled_db import PooledDB
+pool = PooledDB(pymysql, maxconnections=5, **DB_CONFIG)
 
 def _get_connection():
-    return pool.get_connection()
+    return pool.connection()
 ```
 
 The rest of the code doesn't change — `conn.close()` just returns the connection to the pool
-instead of destroying it. MariaDB's Python connector handles this natively.
+instead of destroying it.
 
 **Rule of thumb:** if your app makes more than a few DB calls per second, use pooling.
 
@@ -207,6 +208,50 @@ type hints and enums for `Side`, `Action`, `AccountType`.
 
 **Lesson:** Shared vocabulary matters. When every module uses the same `Trade` dataclass
 instead of ad-hoc dicts, typos and type mismatches surface at development time, not runtime.
+
+---
+
+## YAGNI — You Aren't Gonna Need It
+
+The principle: don't build it until you actually need it. Every feature, tool, or abstraction
+you add "just in case" has a cost — setup time, maintenance, debugging surface, and cognitive
+load for the team. If you don't need it today, don't build it today.
+
+### Where YAGNI Would Have Saved Us Time
+
+**MariaDB C connector → pymysql:** We used the `mariadb` Python package, which requires
+MariaDB Connector/C installed at the system level. This worked fine on dev laptops with admin
+access but broke immediately on the bane server (no sudo, no `mariadb_config`). The pure-Python
+`pymysql` package does the same thing with zero system dependencies. We didn't need the C
+connector's marginal performance advantage — our app handles single-digit requests per second.
+
+**Conda → venv:** We used conda for environment management, which is powerful but heavy. The
+bane server didn't have conda, and most team members only needed a basic virtual environment.
+Python's built-in `venv` module works everywhere Python is installed — no extra tooling needed.
+Conda would have been justified if we needed complex native dependencies (like CUDA or specific
+C libraries), but for our pure-Python stack, it was overkill.
+
+**Connection pooling on day one:** We added connection pooling early in development when we had
+a single user hitting the API. Pooling matters when you have concurrent load — for a desktop app
+with one user refreshing every 10 seconds, a simple `connect()` per request is fine. The pool
+added complexity (pool exhaustion errors, connection lifecycle management) before we needed it.
+
+**Strategy pattern for two algorithms:** The `AlgorithmSwitcher` abstracts over CS and ML
+algorithms with a common interface. This is good design if you're expecting 5+ algorithms, but
+with exactly two, a simple if/else would have worked and been easier for teammates to understand.
+The pattern paid off eventually, but we built it before the second algorithm even existed.
+
+### The YAGNI Decision Framework
+
+Before adding a tool, library, or abstraction, ask:
+1. **Do I need this right now?** If no, stop.
+2. **What's the simplest thing that works?** Use that.
+3. **What's the cost of switching later?** If low (swapping pymysql → mariadb is a 20-minute
+   find-and-replace), start simple. If high (choosing a database engine), invest upfront.
+
+Start with the simplest tools that get the job done. Upgrade only when you hit a real
+limitation, not a hypothetical one. SQLite before MariaDB. `venv` before conda. `pymysql`
+before native connectors. Plain functions before design patterns.
 
 ---
 

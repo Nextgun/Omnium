@@ -9,7 +9,7 @@ Usage:
     python setup_db.py --seed     # Create DB + schema + seed stock data
 
 Requires:
-    - pip install mariadb python-dotenv
+    - pip install pymysql python-dotenv
     - A .env file with OMNIUM_DB_USER and OMNIUM_DB_PASSWORD (see .env.example)
 """
 
@@ -41,11 +41,11 @@ def get_config() -> dict:
 
 def _is_mariadb_running(config: dict) -> bool:
     """Try to connect to MariaDB. Returns True if reachable."""
-    import mariadb
+    import pymysql
 
     # Try with .env password
     try:
-        conn = mariadb.connect(**config)
+        conn = pymysql.connect(**config)
         conn.close()
         return True
     except Exception:
@@ -53,7 +53,7 @@ def _is_mariadb_running(config: dict) -> bool:
 
     # Try with empty password (fresh install)
     try:
-        conn = mariadb.connect(
+        conn = pymysql.connect(
             host=config["host"], port=config["port"],
             user=config["user"], password="",
         )
@@ -216,11 +216,11 @@ def _set_root_password(config: dict) -> None:
         return
 
     try:
-        import mariadb
+        import pymysql
 
         # Try connecting with no password (fresh install default)
         try:
-            conn = mariadb.connect(
+            conn = pymysql.connect(
                 host=config["host"],
                 port=config["port"],
                 user=config["user"],
@@ -232,7 +232,7 @@ def _set_root_password(config: dict) -> None:
             conn.commit()
             conn.close()
             print(f"[setup_db] Root password set to match .env.")
-        except mariadb.Error:
+        except pymysql.Error:
             # Already has a password or can't connect — try with .env password
             pass
     except Exception:
@@ -244,16 +244,16 @@ def _set_root_password(config: dict) -> None:
 
 def create_database(config: dict, db_name: str) -> None:
     """Create the database if it doesn't already exist."""
-    import mariadb
+    import pymysql
 
     try:
-        conn = mariadb.connect(**config)
+        conn = pymysql.connect(**config)
         cursor = conn.cursor()
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`")
         conn.commit()
         print(f"[setup_db] Database '{db_name}' ready.")
         conn.close()
-    except mariadb.Error as e:
+    except pymysql.Error as e:
         print(f"[setup_db] Failed to create database: {e}")
         print()
         print("Troubleshooting:")
@@ -265,7 +265,7 @@ def create_database(config: dict, db_name: str) -> None:
 
 def run_schema(config: dict, db_name: str) -> None:
     """Execute schema.sql to create all tables."""
-    import mariadb
+    import pymysql
 
     schema_path = Path(__file__).parent / "src" / "omnium" / "data" / "schema.sql"
     if not schema_path.exists():
@@ -275,7 +275,7 @@ def run_schema(config: dict, db_name: str) -> None:
     sql = schema_path.read_text(encoding="utf-8")
 
     try:
-        conn = mariadb.connect(**config, database=db_name)
+        conn = pymysql.connect(**config, database=db_name)
         cursor = conn.cursor()
 
         # Execute each statement separately
@@ -287,17 +287,17 @@ def run_schema(config: dict, db_name: str) -> None:
         conn.commit()
         print("[setup_db] Schema applied (assets, prices, accounts, trades).")
         conn.close()
-    except mariadb.Error as e:
+    except pymysql.Error as e:
         print(f"[setup_db] Failed to run schema: {e}")
         sys.exit(1)
 
 
 def create_user_tables(config: dict, db_name: str) -> None:
     """Create users and lockouts tables (same as db.initialize_users_tables)."""
-    import mariadb
+    import pymysql
 
     try:
-        conn = mariadb.connect(**config, database=db_name)
+        conn = pymysql.connect(**config, database=db_name)
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -316,7 +316,7 @@ def create_user_tables(config: dict, db_name: str) -> None:
         conn.commit()
         print("[setup_db] User tables ready (users, lockouts).")
         conn.close()
-    except mariadb.Error as e:
+    except pymysql.Error as e:
         print(f"[setup_db] Failed to create user tables: {e}")
         sys.exit(1)
 

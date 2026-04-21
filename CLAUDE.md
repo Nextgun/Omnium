@@ -60,7 +60,7 @@ Omnium/
 ├── .env.example                # Template for local DB config
 ├── build.bat                   # Build single exe in dist/ folder
 ├── launch_omnium.bat           # Start MariaDB + Flask + WPF in one click
-├── requirements.txt            # flask, mariadb, python-dotenv, yfinance, scikit-learn, numpy, pytest, ruff
+├── requirements.txt            # flask, pymysql, python-dotenv, yfinance, scikit-learn, numpy, pytest, ruff
 ├── setup_dev.py                # One-time dev environment setup (conda env + deps)
 ├── setup_db.py                 # One-time DB setup (installs MariaDB + schema + seed)
 └── sonar-project.properties    # SonarQube config (bane.tamucc.edu:9000)
@@ -72,7 +72,7 @@ Omnium/
 - Database name: omnium_database
 - Config via .env file (see .env.example for setup)
 - Key tables: assets, prices, accounts, trades, users, lockouts
-- All queries use parameterized MariaDB connector
+- All queries use parameterized pymysql connector
 
 ## API (Flask on localhost:5000)
 

@@ -15,7 +15,7 @@
 - [x] Project restructured into `src/omnium/` package layout
 - [x] `.env` config for DB credentials (no more hardcoded passwords)
 - [x] `.env.example` with setup instructions for new devs
-- [x] requirements.txt updated for actual stack (flask, mariadb, python-dotenv)
+- [x] requirements.txt updated for actual stack (flask, pymysql, python-dotenv)
 - [x] `setup_dev.py` — detects Anaconda/Miniconda, creates conda env, installs deps
 - [x] `setup_db.py` — installs MariaDB via winget, creates DB, runs schema, seeds data
 
